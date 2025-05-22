@@ -21,6 +21,7 @@ namespace Console.ExpSoftware
     /* Imports from NET Framework */
     using System;
     using System.Data.SQLite;
+    using System.IO;
     using System.Xml;
 
     using Inventar.DatabaseCore;
