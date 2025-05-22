@@ -8,7 +8,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Folder Include="DatabaseCore\" />
+        <Folder Include="DatabaseCore\Attributes\" />
+        <Folder Include="Core\" />
+        <Folder Include="Extensions\" />
     </ItemGroup>
 
     <ItemGroup>
