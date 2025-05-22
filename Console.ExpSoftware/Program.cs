@@ -20,6 +20,7 @@ namespace Console.ExpSoftware
 {
     /* Imports from NET Framework */
     using System;
+    using System.Collections.Generic;
     using System.Data.SQLite;
     using System.IO;
     using System.Xml;
@@ -30,15 +31,17 @@ namespace Console.ExpSoftware
     public class Program
     {
         private static string databasePath = string.Empty;
+        private static string attachmentPath = string.Empty;
 
         private static void Main(string[] args)
         {
             string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
             databasePath = Path.Combine(new DirectoryInfo(currentDirectory).Parent.Parent.Parent.FullName, "_DemoData", "Inventar.db");
-
+            attachmentPath = Path.Combine(new DirectoryInfo(currentDirectory).Parent.Parent.Parent.FullName, "_DemoData", "AttachmentDemo.png");
 
             ConsoleMenu.Add("01", "Erstellen Datenbank und Tabelle", () => MenuPoint01());
             ConsoleMenu.Add("02", "Tabellen InventarTyp füllen", () => MenuPoint02());
+            ConsoleMenu.Add("03", "Tabellen Attachment füllen", () => MenuPoint03());
             ConsoleMenu.Add("X", "Beenden", () => ApplicationExit());
 
             do
@@ -92,6 +95,24 @@ namespace Console.ExpSoftware
                 ds.Insert(InsertNewRow);
             }
 
+            ConsoleMenu.Wait();
+        }
+
+        private static void MenuPoint03()
+        {
+            Console.Clear();
+
+            if (File.Exists(databasePath) == false)
+            {
+                Console.WriteLine($"Datenbank '{databasePath}' wurde noch nicht erstellt!!");
+                ConsoleMenu.Wait();
+                return;
+            }
+
+            using (DatabaseService ds = new DatabaseService(databasePath))
+            {
+                ds.Insert(InsertAttachment);
+            }
 
             ConsoleMenu.Wait();
         }
@@ -142,6 +163,26 @@ namespace Console.ExpSoftware
             insertInvTyp = new SQLGenerator<InventarTyp>(invTyp);
             resultSql = insertInvTyp.Insert().ToSql();
             sqliteConnection.CmdExecuteNonQuery(resultSql);
+        }
+
+        private static void InsertAttachment(SQLiteConnection sqliteConnection)
+        {
+            Attachments attachments = new Attachments();
+            attachments.Content = null;
+            attachments.FileExtension = Path.GetExtension(attachmentPath);
+            attachments.Filename = Path.GetFileName(attachmentPath);
+            attachments.FileSize = new FileInfo(attachmentPath).Length;
+            attachments.FileDateTime = new FileInfo(attachmentPath).LastWriteTime;
+            SQLGenerator<Attachments> insertInvTyp = new SQLGenerator<Attachments>(attachments);
+            string resultSql = insertInvTyp.Insert().ToSql();
+            Dictionary<string, object> parameterCollection = new Dictionary<string, object>();
+            parameterCollection.Add("@Content", File.ReadAllBytes(attachmentPath));
+            sqliteConnection.CmdExecuteNonQuery(resultSql, parameterCollection);
+        }
+
+        private static void UpdateRow(SQLiteConnection sqliteConnection)
+        {
+
         }
     }
 }

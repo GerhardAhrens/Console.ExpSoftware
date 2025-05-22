@@ -183,7 +183,7 @@ namespace Inventar.DatabaseCore
 
             sb.Clear();
 
-            PropertyInfo[] propInfos = typeof(TEntity).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            List<PropertyInfo> propInfos = InsertAttributesTableColumn();
             sb.Append($"INSERT INTO {tableName}").Append(' ').Append('\n');
             sb.Append('(');
             sb.Append(string.Join(", ", propInfos.Select(s => s.Name)));
@@ -294,7 +294,15 @@ namespace Inventar.DatabaseCore
 
             if (propertyInfo.PropertyType == typeof(string))
             {
-                value = $"'{propertyInfo.GetValue(this.Entity).ToString()}'";
+                object obj = propertyInfo.GetValue(this.Entity);
+                if (obj == null)
+                {
+                    value = $"''";
+                }
+                else
+                {
+                    value = $"'{propertyInfo.GetValue(this.Entity).ToString()}'";
+                }
             }
             else if (propertyInfo.PropertyType == typeof(int))
             {
@@ -314,7 +322,14 @@ namespace Inventar.DatabaseCore
             }
             else if (propertyInfo.PropertyType == typeof(DateTime))
             {
-                value = $"'{Convert.ToDateTime(propertyInfo.GetValue(this.Entity)).ToString("yyyy-MM-dd HH:mm:ss")}'";
+                if ((DateTime)propertyInfo.GetValue(this.Entity) == DateTime.MinValue)
+                {
+                    value = $"'{new DateTime(1900, 1, 1).ToString("yyyy-MM-dd HH:mm:ss")}'";
+                }
+                else
+                {
+                    value = $"'{Convert.ToDateTime(propertyInfo.GetValue(this.Entity)).ToString("yyyy-MM-dd HH:mm:ss")}'";
+                }
             }
             else if (propertyInfo.PropertyType == typeof(bool))
             {
@@ -330,6 +345,10 @@ namespace Inventar.DatabaseCore
             else if (propertyInfo.PropertyType == typeof(Guid))
             {
                 value = $"'{propertyInfo.GetValue(this.Entity).ToString()}'";
+            }
+            else if (propertyInfo.PropertyType == typeof(byte[]))
+            {
+                value = $"@{propertyInfo.Name}";
             }
 
             return value;
@@ -910,6 +929,17 @@ namespace Inventar.DatabaseCore
                 .SelectMany(p => p.GetCustomAttributes())
                 .OfType<TableColumnAttribute>()
                 .AsParallel();
+
+            return obj;
+        }
+
+        private List<PropertyInfo> InsertAttributesTableColumn()
+        {
+            List<PropertyInfo> obj = null;
+            obj = typeof(TEntity).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(w => w.IsDefined(typeof(TableColumnAttribute),false))
+                .Select(s => s)
+                .ToList();
 
             return obj;
         }
