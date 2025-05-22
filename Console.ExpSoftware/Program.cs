@@ -42,6 +42,7 @@ namespace Console.ExpSoftware
             ConsoleMenu.Add("01", "Erstellen Datenbank und Tabelle", () => MenuPoint01());
             ConsoleMenu.Add("02", "Tabellen InventarTyp füllen", () => MenuPoint02());
             ConsoleMenu.Add("03", "Tabellen Attachment füllen", () => MenuPoint03());
+            ConsoleMenu.Add("04", "Tabellen Insert/Update Inventar", () => MenuPoint04());
             ConsoleMenu.Add("X", "Beenden", () => ApplicationExit());
 
             do
@@ -117,6 +118,25 @@ namespace Console.ExpSoftware
             ConsoleMenu.Wait();
         }
 
+        private static void MenuPoint04()
+        {
+            Console.Clear();
+
+            if (File.Exists(databasePath) == false)
+            {
+                Console.WriteLine($"Datenbank '{databasePath}' wurde noch nicht erstellt!!");
+                ConsoleMenu.Wait();
+                return;
+            }
+
+            using (DatabaseService ds = new DatabaseService(databasePath))
+            {
+                ds.Update(InsertUpdateInventarRow);
+            }
+
+            ConsoleMenu.Wait();
+        }
+
         private static void CreateTableInDB(SQLiteConnection sqliteConnection)
         {
             SQLGenerator<Inventars> createInventar = new SQLGenerator<Inventars>(null);
@@ -180,9 +200,12 @@ namespace Console.ExpSoftware
             sqliteConnection.CmdExecuteNonQuery(resultSql, parameterCollection);
         }
 
-        private static void UpdateRow(SQLiteConnection sqliteConnection)
+        private static void InsertUpdateInventarRow(SQLiteConnection sqliteConnection)
         {
-
+            Inventars inv = new Inventars("Münzen 5 DM",new DateTime(1985,1,1),100.99M);
+            SQLGenerator<Inventars> insertInv = new SQLGenerator<Inventars>(inv);
+            string resultSql = insertInv.Insert().ToSql();
+            sqliteConnection.CmdExecuteNonQuery(resultSql);
         }
     }
 }
