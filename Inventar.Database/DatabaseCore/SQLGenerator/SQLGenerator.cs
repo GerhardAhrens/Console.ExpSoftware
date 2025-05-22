@@ -16,6 +16,7 @@
 namespace Inventar.DatabaseCore
 {
     using System;
+    using System.ComponentModel;
     using System.Globalization;
     using System.Linq.Expressions;
     using System.Reflection;
@@ -99,6 +100,10 @@ namespace Inventar.DatabaseCore
                     {
                         sb.Append($"{column.ColumnName} {SQLiteDataType.DateTime},").Append('\n');
                     }
+                    else if (propertyInfo.PropertyType == typeof(byte[]))
+                    {
+                        sb.Append($"{column.ColumnName} {SQLiteDataType.BLOB} null default (x''),").Append('\n');
+                    }
                     else
                     {
                         sb.Append($"{column.ColumnName} {SQLiteDataType.Text},").Append('\n');
@@ -123,6 +128,51 @@ namespace Inventar.DatabaseCore
             }
 
             sb.Append(')');
+
+            List<ColumnIndexAttribute> columnsIndex = this.CustomerAttributesIndex();
+            if (columnsIndex != null && columnsIndex.Count > 0)
+            {
+                sb.Append(';').Append('\n').Append('\n');
+                int indexGroupCount = columnsIndex.GroupBy(p => p.IndexGroup).Count();
+                if (indexGroupCount > 0)
+                {
+                    var indexGroup = columnsIndex.GroupBy(p => p.IndexGroup).ToList();
+                    foreach (var indPrefix in indexGroup)
+                    {
+                        string idxName = string.Empty;
+                        if (string.IsNullOrEmpty(indPrefix.Key) == true)
+                        {
+                            idxName = "Index";
+                        }
+                        else
+                        {
+                            idxName = indPrefix.Key;
+                        }
+
+                        sb.Append($"CREATE INDEX idx_{tableName}_{idxName} ON {tableName} (");
+                        IEnumerable<ColumnIndexAttribute> propAttributes = columnsIndex.Where(p => p.IndexGroup == indPrefix.Key);
+                        foreach (ColumnIndexAttribute customerAttr in propAttributes.OrderBy(p => ((ColumnIndexAttribute)p).Order))
+                        {
+                            ListSortDirection sortDirection = customerAttr.SortDirection;
+                            if (sortDirection == ListSortDirection.Ascending)
+                            {
+                                sb.Append($"{customerAttr.ColumnName} ASC,");
+                            }
+                            else if (sortDirection == ListSortDirection.Descending)
+                            {
+                                sb.Append($"{customerAttr.ColumnName} DESC,");
+                            }
+                            else
+                            {
+                                sb.Append($"{customerAttr.ColumnName},");
+                            }
+                        }
+
+                        sb.Remove(sb.ToString().Trim().Length - 1, 1);
+                        sb.Append(");").Append('\n');
+                    }
+                }
+            }
 
             return this;
         }
@@ -875,6 +925,16 @@ namespace Inventar.DatabaseCore
                 .ToList();
 
             return obj;
+        }
+
+        private List<ColumnIndexAttribute> CustomerAttributesIndex()
+        {
+            IEnumerable<ColumnIndexAttribute> obj = typeof(TEntity).GetProperties()
+                .SelectMany(p => p.GetCustomAttributes())
+                .OfType<ColumnIndexAttribute>()
+                .AsParallel();
+
+            return obj.ToList();
         }
 
         private DateTime ConvertToDateTime(string str)

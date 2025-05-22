@@ -15,15 +15,17 @@
 
 namespace Inventar.Model
 {
+    using System;
+
     using Inventar.DatabaseCore;
 
-    public sealed partial class Inventars
+    public sealed partial class InventarTyp
     {
         public string FullName
         {
             get
             {
-                return $"{this.Name}-{this.InventarTyp}-{this.GekauftAm.ToShortDateString()}-{this.KaufBetrag.ToString("#.00")}";
+                return $"{this.Name}-{this.Typ}";
             }
         }
 

@@ -34,13 +34,11 @@ namespace Console.ExpSoftware
         private static void Main(string[] args)
         {
             string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            databasePath = Path.Combine(new DirectoryInfo(currentDirectory).Parent.Parent.Parent.FullName, "_DemoData", "DemoDatabase.db");
+            databasePath = Path.Combine(new DirectoryInfo(currentDirectory).Parent.Parent.Parent.FullName, "_DemoData", "Inventar.db");
 
 
-            ConsoleMenu.Add("01", "Erstellen Datenbank und Tabelle", () => MenuPoint1("1"));
-            ConsoleMenu.Add("10", "Auswahl Menüpunkt 10", () => MenuPoint1("10"));
-            ConsoleMenu.Add("99", "Auswahl Menüpunkt 99", () => MenuPoint1("99"));
-            ConsoleMenu.Add("2", "Auswahl Menüpunkt 2", () => MenuPoint2());
+            ConsoleMenu.Add("01", "Erstellen Datenbank und Tabelle", () => MenuPoint01());
+            ConsoleMenu.Add("02", "Tabellen InventarTyp füllen", () => MenuPoint02());
             ConsoleMenu.Add("X", "Beenden", () => ApplicationExit());
 
             do
@@ -55,7 +53,7 @@ namespace Console.ExpSoftware
             Environment.Exit(0);
         }
 
-        private static void MenuPoint1(string param)
+        private static void MenuPoint01()
         {
             Console.Clear();
 
@@ -75,20 +73,74 @@ namespace Console.ExpSoftware
             }
 
 
-            ConsoleMenu.Wait(param);
+            ConsoleMenu.Wait();
         }
 
-        private static void MenuPoint2()
+        private static void MenuPoint02()
         {
             Console.Clear();
+
+            if (File.Exists(databasePath) == false)
+            {
+                Console.WriteLine($"Datenbank '{databasePath}' wurde noch nicht erstellt!!");
+                ConsoleMenu.Wait();
+                return;
+            }
+
+            using (DatabaseService ds = new DatabaseService(databasePath))
+            {
+                ds.Insert(InsertNewRow);
+            }
+
 
             ConsoleMenu.Wait();
         }
 
         private static void CreateTableInDB(SQLiteConnection sqliteConnection)
         {
-            SQLGenerator<Inventars> cr = new SQLGenerator<Inventars>(null);
-            string resultSql = cr.CreateTable().ToSql();
+            SQLGenerator<Inventars> createInventar = new SQLGenerator<Inventars>(null);
+            string resultSql = createInventar.CreateTable().ToSql();
+            sqliteConnection.CmdExecuteNonQuery(resultSql);
+
+            SQLGenerator<InventarTyp> createInventarTyp = new SQLGenerator<InventarTyp>(null);
+            resultSql = createInventarTyp.CreateTable().ToSql();
+            sqliteConnection.CmdExecuteNonQuery(resultSql);
+
+            SQLGenerator<Attachments> createAttachments = new SQLGenerator<Attachments>(null);
+            resultSql = createAttachments.CreateTable().ToSql();
+            sqliteConnection.CmdExecuteNonQuery(resultSql);
+        }
+
+        private static void InsertNewRow(SQLiteConnection sqliteConnection)
+        {
+            InventarTyp invTyp = new InventarTyp("Keine Auswahl", 1);
+            SQLGenerator<InventarTyp> insertInvTyp = new SQLGenerator<InventarTyp>(invTyp);
+            string resultSql = insertInvTyp.Insert().ToSql();
+            sqliteConnection.CmdExecuteNonQuery(resultSql);
+
+            invTyp = new InventarTyp("Münzen, Medaillen, Brifmarken", 2);
+            insertInvTyp = new SQLGenerator<InventarTyp>(invTyp);
+            resultSql = insertInvTyp.Insert().ToSql();
+            sqliteConnection.CmdExecuteNonQuery(resultSql);
+
+            invTyp = new InventarTyp("Schmuck, Minerale, Edelsteine", 3);
+            insertInvTyp = new SQLGenerator<InventarTyp>(invTyp);
+            resultSql = insertInvTyp.Insert().ToSql();
+            sqliteConnection.CmdExecuteNonQuery(resultSql);
+
+            invTyp = new InventarTyp("Uhren", 4);
+            insertInvTyp = new SQLGenerator<InventarTyp>(invTyp);
+            resultSql = insertInvTyp.Insert().ToSql();
+            sqliteConnection.CmdExecuteNonQuery(resultSql);
+
+            invTyp = new InventarTyp("Dokumente", 5);
+            insertInvTyp = new SQLGenerator<InventarTyp>(invTyp);
+            resultSql = insertInvTyp.Insert().ToSql();
+            sqliteConnection.CmdExecuteNonQuery(resultSql);
+
+            invTyp = new InventarTyp("Bilder", 6);
+            insertInvTyp = new SQLGenerator<InventarTyp>(invTyp);
+            resultSql = insertInvTyp.Insert().ToSql();
             sqliteConnection.CmdExecuteNonQuery(resultSql);
         }
     }

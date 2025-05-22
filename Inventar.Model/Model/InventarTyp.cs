@@ -16,20 +16,18 @@
 namespace Inventar.Model
 {
     using System;
-    using System.ComponentModel;
 
     using Inventar.DatabaseCore;
 
-    [DataTable("TAB_Inventar")]
-    public sealed partial class Inventars
+    [DataTable("TAB_InventarTyp")]
+    public sealed partial class InventarTyp
     {
-        public Inventars(string name, DateTime gekauftAm, decimal kaufBetrag)
+        public InventarTyp(string name, int typ)
         {
             this.Id = Guid.NewGuid();
             this.Name = name;
-            this.KaufBetrag = kaufBetrag;
+            this.Typ = typ;
             this.IsActive = true;
-            this.InventarAlter = this.GetAge(gekauftAm);
             this.CreatedBy = UserInfo.TS().CurrentUser;
             this.CreatedOn = UserInfo.TS().CurrentTime;
         }
@@ -44,24 +42,11 @@ namespace Inventar.Model
         [TableColumn(SQLiteDataType.VarChar, 250)]
         public string Description { get; set; }
 
-        [TableColumn(SQLiteDataType.VarChar, 250)]
-        public string InventarInfo { get; set; }
-
-        [ColumnIndex("InventarTyp","InvTyp",ListSortDirection.Ascending)]
         [TableColumn(SQLiteDataType.Integer)]
-        public int InventarTyp { get; set; }
+        public int Typ { get; set; }
 
         [TableColumn(SQLiteDataType.Boolean)]
         public bool IsActive { get; set; }
-
-        [TableColumn(SQLiteDataType.DateTime)]
-        public DateTime GekauftAm { get; set; }
-
-        [TableColumn(SQLiteDataType.Integer)]
-        public int InventarAlter { get; }
-
-        [TableColumn(SQLiteDataType.Decimal, 8, 2)]
-        public decimal KaufBetrag { get; set; }
 
         [TableColumn(SQLiteDataType.Text, 50)]
         public string CreatedBy { get; set; }
@@ -74,15 +59,5 @@ namespace Inventar.Model
 
         [TableColumn(SQLiteDataType.DateTime)]
         public DateTime ModifiedOn { get; set; }
-
-        private int GetAge(DateTime dateOfBirth)
-        {
-            var today = DateTime.Today;
-
-            var a = (today.Year * 100 + today.Month) * 100 + today.Day;
-            var b = (dateOfBirth.Year * 100 + dateOfBirth.Month) * 100 + dateOfBirth.Day;
-
-            return (a - b) / 10000;
-        }
     }
 }
