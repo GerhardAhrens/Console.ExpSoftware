@@ -21,8 +21,10 @@ namespace Console.ExpSoftware
     /* Imports from NET Framework */
     using System;
     using System.Collections.Generic;
+    using System.Data;
     using System.Data.SQLite;
     using System.IO;
+    using System.Linq;
     using System.Xml;
 
     using Inventar.DatabaseCore;
@@ -43,6 +45,7 @@ namespace Console.ExpSoftware
             ConsoleMenu.Add("02", "Tabellen InventarTyp füllen", () => MenuPoint02());
             ConsoleMenu.Add("03", "Tabellen Attachment füllen", () => MenuPoint03());
             ConsoleMenu.Add("04", "Tabellen Insert/Update Inventar", () => MenuPoint04());
+            ConsoleMenu.Add("05", "Tabellen Delete Inventar", () => MenuPoint05());
             ConsoleMenu.Add("X", "Beenden", () => ApplicationExit());
 
             do
@@ -137,6 +140,25 @@ namespace Console.ExpSoftware
             ConsoleMenu.Wait();
         }
 
+        private static void MenuPoint05()
+        {
+            Console.Clear();
+
+            if (File.Exists(databasePath) == false)
+            {
+                Console.WriteLine($"Datenbank '{databasePath}' wurde noch nicht erstellt!!");
+                ConsoleMenu.Wait();
+                return;
+            }
+
+            using (DatabaseService ds = new DatabaseService(databasePath))
+            {
+                ds.Delete(DeleteInventarRow);
+            }
+
+            ConsoleMenu.Wait();
+        }
+
         private static void CreateTableInDB(SQLiteConnection sqliteConnection)
         {
             SQLGenerator<Inventars> createInventar = new SQLGenerator<Inventars>(null);
@@ -202,10 +224,41 @@ namespace Console.ExpSoftware
 
         private static void InsertUpdateInventarRow(SQLiteConnection sqliteConnection)
         {
-            Inventars inv = new Inventars("Münzen 5 DM",new DateTime(1985,1,1),100.99M);
-            SQLGenerator<Inventars> insertInv = new SQLGenerator<Inventars>(inv);
-            string resultSql = insertInv.Insert().ToSql();
+            SQLGenerator<Inventars> selectInv = new SQLGenerator<Inventars>(null);
+            string resultSql = selectInv.Select(SQLSelectOperator.Count).ToSql();
+            int count = sqliteConnection.CmdExecuteScalar<int>(resultSql);
+            if (count == 0)
+            {
+                Inventars inv = new Inventars("Münzen 10 DM", new DateTime(1986, 1, 1), 150.66M);
+                SQLGenerator<Inventars> insertInv = new SQLGenerator<Inventars>(inv);
+                resultSql = insertInv.Insert(true).ToSql();
+                sqliteConnection.CmdExecuteNonQuery(resultSql);
+            }
+
+            resultSql = selectInv.Select().Take(1).ToSql();
+            DataTable tableInv = sqliteConnection.CmdReaderToDataTable(resultSql);
+            IEnumerable<Inventars> entityInv = sqliteConnection.CmdReaderToMap<Inventars>(resultSql);
+
+            Inventars invUpdate = entityInv.FirstOrDefault();
+            invUpdate.GekauftAm = new DateTime(1984, 6, 28);
+            invUpdate.ModifiedBy = UserInfo.TS().CurrentUser;
+            invUpdate.ModifiedOn = UserInfo.TS().CurrentTime;
+            SQLGenerator<Inventars> updateInv = new SQLGenerator<Inventars>(invUpdate);
+            resultSql = updateInv.Update(u => u.GekauftAm, u => u.InventarAlter, u => u.ModifiedBy, u => u.ModifiedOn).Where(w => w.Id,SQLComparison.Equals, invUpdate.Id).ToSql();
             sqliteConnection.CmdExecuteNonQuery(resultSql);
+        }
+
+        private static void DeleteInventarRow(SQLiteConnection sqliteConnection)
+        {
+            SQLGenerator<Inventars> selectInv = new SQLGenerator<Inventars>(null);
+            string resultSql = selectInv.Select().Take(1).ToSql();
+            DataTable tableInv = sqliteConnection.CmdReaderToDataTable(resultSql);
+            IEnumerable<Inventars> entityInv = sqliteConnection.CmdReaderToMap<Inventars>(resultSql);
+            Inventars invDelete = entityInv.FirstOrDefault();
+
+            SQLGenerator<Inventars> deleteInv = new SQLGenerator<Inventars>(invDelete);
+            resultSql = deleteInv.Delete(d => d.Id).ToSql();
+            int deleteCount = sqliteConnection.CmdExecuteNonQuery(resultSql);
         }
     }
 }

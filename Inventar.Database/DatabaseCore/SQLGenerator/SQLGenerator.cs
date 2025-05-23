@@ -177,7 +177,7 @@ namespace Inventar.DatabaseCore
             return this;
         }
 
-        public ISQLGenerator<TEntity> Insert()
+        public ISQLGenerator<TEntity> Insert(bool parameterOnly = false)
         {
             string tableName = this.DataTableAttributes();
 
@@ -190,16 +190,24 @@ namespace Inventar.DatabaseCore
             sb.Append(')').Append(' ');
             sb.Append('\n').Append("VALUES").Append('\n');
             sb.Append(' ').Append('(');
-            sb.Append(string.Join(", ", propInfos.Select(pi => $"{this.InsertHelper(pi)}")));
+            if (parameterOnly == true)
+            {
+                sb.Append('@').Append(string.Join(", @", propInfos.Select(s => s.Name)));
+            }
+            else
+            {
+                sb.Append(string.Join(", ", propInfos.Select(pi => $"{this.InsertHelper(pi)}")));
+            }
+
             sb.Append(')');
 
             return this;
         }
 
-        public ISQLGenerator<TEntity> Update()
+        public ISQLGenerator<TEntity> Update(bool parameterOnly = false)
         {
             string tableName = this.DataTableAttributes();
-            PropertyInfo[] propInfos = typeof(TEntity).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            List<PropertyInfo> propInfos = InsertAttributesTableColumn();
             List<string> keyColumns = this.CustomerAttributesPK();
 
             sb.Clear();
@@ -211,7 +219,15 @@ namespace Inventar.DatabaseCore
                 {
                     sb.Append(item.Name);
                     sb.Append(" = ");
-                    sb.Append($"{this.InsertHelper(item)}");
+                    if (parameterOnly == true)
+                    {
+                        sb.Append('@').Append(item.Name);
+                    }
+                    else
+                    {
+                        sb.Append($"{this.InsertHelper(item)}");
+                    }
+
                     sb.Append(',');
                 }
             }
@@ -224,7 +240,7 @@ namespace Inventar.DatabaseCore
         public ISQLGenerator<TEntity> Update(params Expression<Func<TEntity, object>>[] expressions)
         {
             string tableName = this.DataTableAttributes();
-            PropertyInfo[] propInfos = typeof(TEntity).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            List<PropertyInfo> propInfos = InsertAttributesTableColumn();
             List<string> keyColumns = this.CustomerAttributesPK();
 
             sb.Clear();
@@ -249,9 +265,21 @@ namespace Inventar.DatabaseCore
             return this;
         }
 
+        public ISQLGenerator<TEntity> Delete()
+        {
+            const string DELETE = "DELETE FROM";
+
+            string tableName = this.DataTableAttributes();
+
+            sb.Clear();
+            sb.Append($"{DELETE} {tableName}");
+
+            return this;
+        }
+
         public ISQLGenerator<TEntity> Delete(params Expression<Func<TEntity, object>>[] expressions)
         {
-            const string DELETE = "DELETE";
+            const string DELETE = "DELETE FROM";
             const string WHERE = "WHERE";
             const string AND = "AND";
 
@@ -370,7 +398,7 @@ namespace Inventar.DatabaseCore
         public ISQLGenerator<TEntity> Select(SQLSelectOperator selectOperator = SQLSelectOperator.All)
         {
             string tableName = this.DataTableAttributes();
-            PropertyInfo[] propInfos = typeof(TEntity).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            List<PropertyInfo> propInfos = InsertAttributesTableColumn();
 
             sb.Clear();
             sb.Append($"SELECT").Append(' ').Append('\n');

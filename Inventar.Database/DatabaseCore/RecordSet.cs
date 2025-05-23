@@ -183,7 +183,7 @@ namespace Inventar.DatabaseCore
 
                     using (SQLiteDataReader dr = cmd.ExecuteReader())
                     {
-                        if (dr.HasRows == true)
+                        if (dr.HasRows == true && dr.VisibleFieldCount > 0)
                         {
                             DataTable dt = new DataTable();
                             dt.TableName = this.ExtractTablename(this.SQL);

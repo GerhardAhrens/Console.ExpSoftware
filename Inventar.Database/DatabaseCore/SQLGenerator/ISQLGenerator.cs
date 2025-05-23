@@ -21,8 +21,8 @@ namespace Inventar.DatabaseCore
     public interface ISQLGenerator<TEntity>
     {
         ISQLGenerator<TEntity> CreateTable();
-        ISQLGenerator<TEntity> Insert();
-        ISQLGenerator<TEntity> Update();
+        ISQLGenerator<TEntity> Insert(bool parameterOnly = false);
+        ISQLGenerator<TEntity> Update(bool parameterOnly = false);
         ISQLGenerator<TEntity> Update(params Expression<Func<TEntity, object>>[] expressions);
         ISQLGenerator<TEntity> Delete(params Expression<Func<TEntity, object>>[] expressions);
         ISQLGenerator<TEntity> Select(SQLSelectOperator selectOperator = SQLSelectOperator.All);

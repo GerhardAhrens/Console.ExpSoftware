@@ -23,12 +23,18 @@ namespace Inventar.Model
     [DataTable("TAB_Inventar")]
     public sealed partial class Inventars
     {
+        private DateTime _GekauftAm;
+
+        public Inventars()
+        {
+        }
         public Inventars(string name, DateTime gekauftAm, decimal kaufBetrag)
         {
             this.Id = Guid.NewGuid();
             this.Name = name;
             this.KaufBetrag = kaufBetrag;
             this.IsActive = true;
+            this.GekauftAm = gekauftAm;
             this.InventarAlter = this.GetAge(gekauftAm);
             this.CreatedBy = UserInfo.TS().CurrentUser;
             this.CreatedOn = UserInfo.TS().CurrentTime;
@@ -36,7 +42,7 @@ namespace Inventar.Model
 
         [PrimaryKey]
         [TableColumn(SQLiteDataType.Guid)]
-        public Guid Id { get; }
+        public Guid Id { get; set; }
 
         [TableColumn(SQLiteDataType.Text, 50)]
         public string Name { get; set; }
@@ -55,10 +61,19 @@ namespace Inventar.Model
         public bool IsActive { get; set; }
 
         [TableColumn(SQLiteDataType.DateTime)]
-        public DateTime GekauftAm { get; set; }
+        public DateTime GekauftAm
+        {
+            get { return this._GekauftAm; }
+            set
+            { 
+                this._GekauftAm = value;
+                this.InventarAlter = this.GetAge(value);
+            }
+        }
+
 
         [TableColumn(SQLiteDataType.Integer)]
-        public int InventarAlter { get; }
+        public int InventarAlter { get; private set; }
 
         [TableColumn(SQLiteDataType.Decimal, 8, 2)]
         public decimal KaufBetrag { get; set; }

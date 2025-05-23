@@ -378,6 +378,46 @@ namespace System.Data.SQLite
 
         #endregion run CmdReaderToDataTable
 
+        #region CmdReaderToMapOfT
+        public static IEnumerable<TModel> CmdReaderToMap<TModel>(this SQLiteConnection connection, string sql, CommandType commandType = CommandType.Text)
+        {
+            IEnumerable<TModel> resultCommand = null;
+
+            if (connection == null)
+            {
+                throw new ArgumentNullException("connection is missing");
+            }
+
+            if (string.IsNullOrEmpty(sql))
+            {
+                throw new ArgumentNullException("sql is missing");
+            }
+
+            try
+            {
+                using (SQLiteCommand cmd = connection.CreateCommand())
+                {
+                    cmd.CommandType = commandType;
+                    cmd.CommandText = sql;
+                    using (SQLiteDataReader dr = cmd.ExecuteReader(CommandBehavior.Default))
+                    {
+                        if (dr.HasRows == true && dr.VisibleFieldCount > 0)
+                        {
+                            resultCommand = dr.MapToList<TModel>();
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return resultCommand;
+        }
+
+        #endregion CmdReaderToMapOfT
+
         #region SQL Helper Methodes
 
         public static string ConvertSqlToString(this SQLiteCommand pSqlCommand)

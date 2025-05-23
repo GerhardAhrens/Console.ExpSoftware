@@ -214,6 +214,35 @@ namespace Inventar.DatabaseCore
             }
         }
 
+        public void Delete(Action<SQLiteConnection> actionMethod)
+        {
+            try
+            {
+                if (File.Exists(this.FullName) == true)
+                {
+                    using (SQLiteConnection sqliteConnection = new SQLiteConnection(this.SqlConnectionString))
+                    {
+                        if (sqliteConnection.State != ConnectionState.Open)
+                        {
+                            sqliteConnection.Open();
+                            this.IsOpen = true;
+                        }
+
+                        if (actionMethod != null)
+                        {
+                            actionMethod?.Invoke(sqliteConnection);
+                        }
+
+                        sqliteConnection.Close();
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public bool DeleteDatabaseFile()
         {
             try

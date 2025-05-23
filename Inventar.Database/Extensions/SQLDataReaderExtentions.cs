@@ -23,7 +23,7 @@ namespace System.Data.SQLite
 
     public static class SQLDataReaderExtentions
     {
-        public static List<T> MapToList<T>(this SQLiteDataReader @this) where T : new()
+        public static List<T> MapToList<T>(this SQLiteDataReader @this)
         {
             List<T> result = null;
             var entity = typeof(T);
@@ -38,7 +38,7 @@ namespace System.Data.SQLite
                     propertyDict = Props.ToDictionary(p => p.Name.ToUpper(), p => p);
                     while (@this.Read())
                     {
-                        T newObject = new T();
+                        T newObject = (T)Activator.CreateInstance(entity);
                         for (int index = 0; index < @this.FieldCount; index++)
                         {
                             if (propertyDict.ContainsKey(@this.GetName(index).ToUpper()))
