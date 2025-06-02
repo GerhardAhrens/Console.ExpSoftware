@@ -11,7 +11,7 @@
 // <summary>Class for TableColumnAttribute</summary>
 //-----------------------------------------------------------------------
 
-namespace Inventar.DatabaseCore
+namespace Inventar.Generator
 {
     using System;
     using System.Runtime.CompilerServices;

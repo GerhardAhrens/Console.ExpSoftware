@@ -23,11 +23,9 @@ namespace Inventar.DatabaseCore
     {
         private bool classIsDisposed = false;
 
-        public DatabaseService(string fullPath)
+        public DatabaseService(string connectionInfo = "")
         {
-            this.FullName = fullPath;
-            this.Database = Path.GetFileName(fullPath);
-            this.SqlConnectionString = this.ConnectStringToText(this.FullName);
+            this.Init(connectionInfo);
         }
 
         ~DatabaseService()
@@ -73,9 +71,10 @@ namespace Inventar.DatabaseCore
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex) when (ex is SQLiteException)
             {
-                throw;
+                string errorText = ex.Message;
+                throw new SQLiteException($"Es ist ein Problem Datenbankdatei '{this.FullName}' aufgetreten!",ex);
             }
         }
 
@@ -104,9 +103,10 @@ namespace Inventar.DatabaseCore
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex) when (ex is SQLiteException)
             {
-                throw;
+                string errorText = ex.Message;
+                throw new SQLiteException($"Es ist ein Problem Datenbankdatei '{this.FullName}' aufgetreten!", ex);
             }
         }
 
@@ -117,7 +117,7 @@ namespace Inventar.DatabaseCore
                 if (File.Exists(this.FullName) == true)
                 {
                     SQLiteConnection sqliteConnection = new SQLiteConnection(this.SqlConnectionString);
-                        if (sqliteConnection.State != ConnectionState.Open)
+                    if (sqliteConnection.State != ConnectionState.Open)
                     {
                         sqliteConnection.Open();
                         this.Connection = sqliteConnection;
@@ -125,9 +125,10 @@ namespace Inventar.DatabaseCore
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex) when (ex is SQLiteException)
             {
-                throw;
+                string errorText = ex.Message;
+                throw new SQLiteException($"Es ist ein Problem Datenbankdatei '{this.FullName}' aufgetreten!", ex);
             }
 
             return this.Connection;
@@ -150,9 +151,10 @@ namespace Inventar.DatabaseCore
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex) when (ex is SQLiteException)
             {
-                throw;
+                string errorText = ex.Message;
+                throw new SQLiteException($"Es ist ein Problem Datenbankdatei '{this.FullName}' aufgetreten!", ex);
             }
         }
 
@@ -179,9 +181,10 @@ namespace Inventar.DatabaseCore
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex) when (ex is SQLiteException)
             {
-                throw;
+                string errorText = ex.Message;
+                throw new SQLiteException($"Es ist ein Problem Datenbankdatei '{this.FullName}' aufgetreten!", ex);
             }
         }
 
@@ -208,9 +211,10 @@ namespace Inventar.DatabaseCore
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex) when (ex is SQLiteException)
             {
-                throw;
+                string errorText = ex.Message;
+                throw new SQLiteException($"Es ist ein Problem Datenbankdatei '{this.FullName}' aufgetreten!", ex);
             }
         }
 
@@ -237,9 +241,10 @@ namespace Inventar.DatabaseCore
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex) when (ex is SQLiteException)
             {
-                throw;
+                string errorText = ex.Message;
+                throw new SQLiteException($"Es ist ein Problem Datenbankdatei '{this.FullName}' aufgetreten!", ex);
             }
         }
 
@@ -258,8 +263,14 @@ namespace Inventar.DatabaseCore
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex) when (ex is SQLiteException)
             {
+                string errorText = ex.Message;
+                throw new SQLiteException($"Es ist ein Problem Datenbankdatei '{this.FullName}' aufgetreten!", ex);
+            }
+            catch (Exception ex)
+            {
+                string errorText = ex.Message;
                 throw;
             }
 
@@ -281,8 +292,9 @@ namespace Inventar.DatabaseCore
                     var result = this.CopyFileAsync(this.FullName, targetBackup);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                string errorText = ex.Message;
                 throw;
             }
         }
@@ -312,8 +324,9 @@ namespace Inventar.DatabaseCore
                 }
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                string errorText = ex.Message;
                 throw;
             }
 
@@ -355,8 +368,9 @@ namespace Inventar.DatabaseCore
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                string errorText = ex.Message;
                 throw;
             }
 
@@ -387,9 +401,9 @@ namespace Inventar.DatabaseCore
                     sqliteConnection.Close();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                string errorText = ex.Message;
                 throw;
             }
 
@@ -420,8 +434,9 @@ namespace Inventar.DatabaseCore
                     result = fi.Length;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                string errorText = ex.Message;
                 throw;
             }
 
@@ -530,6 +545,33 @@ namespace Inventar.DatabaseCore
             }
 
             return meta;
+        }
+
+        private void Init(string connectionInfo)
+        {
+            try
+            {
+
+
+                if (string.IsNullOrEmpty(connectionInfo) == false)
+                {
+                    this.FullName = connectionInfo;
+                    this.Database = Path.GetFileName(connectionInfo);
+                    this.SqlConnectionString = this.ConnectStringToText(this.FullName);
+                }
+                else
+                {
+                    string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                    this.FullName = Path.Combine(new DirectoryInfo(currentDirectory).Parent.Parent.Parent.FullName, "_DemoData", "Inventar.db");
+                    this.Database = Path.GetFileName(connectionInfo);
+                    this.SqlConnectionString = this.ConnectStringToText(this.FullName);
+                }
+            }
+            catch (Exception ex) when (ex is FileNotFoundException)
+            {
+                string errorText = ex.Message;
+                throw new FileNotFoundException($"Die Datenbankdatei '{connectionInfo}' ist nicht vorhanden!");
+            }
         }
 
         private string ConnectStringToText(string databasePath)

@@ -11,7 +11,7 @@
 // <summary>Class for SQLiteDataType (Enum)</summary>
 //-----------------------------------------------------------------------
 
-namespace Inventar.DatabaseCore
+namespace Inventar.Generator
 {
     public enum SQLiteDataType
     {

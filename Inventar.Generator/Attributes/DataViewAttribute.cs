@@ -22,7 +22,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
 */
 
-namespace Inventar.DatabaseCore
+namespace Inventar.Generator
 {
     using System;
     using System.Runtime.CompilerServices;

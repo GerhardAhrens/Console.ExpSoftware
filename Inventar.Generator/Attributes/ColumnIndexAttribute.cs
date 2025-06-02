@@ -11,7 +11,7 @@
 // <summary>ColumnIndexPropertyAttribute</summary>
 //-----------------------------------------------------------------------
 
-namespace Inventar.DatabaseCore
+namespace Inventar.Generator
 {
     using System;
     using System.ComponentModel;

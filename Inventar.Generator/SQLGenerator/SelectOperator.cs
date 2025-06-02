@@ -13,7 +13,7 @@
 // </summary>
 //-----------------------------------------------------------------------
 
-namespace Inventar.DatabaseCore
+namespace Inventar.Generator
 {
     using System.ComponentModel;
 

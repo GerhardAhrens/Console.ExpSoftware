@@ -17,7 +17,7 @@ namespace Inventar.Model
 {
     using System;
 
-    using Inventar.DatabaseCore;
+    using Inventar.Generator;
 
     [DataTable("TAB_Attachment")]
     public sealed partial class Attachments

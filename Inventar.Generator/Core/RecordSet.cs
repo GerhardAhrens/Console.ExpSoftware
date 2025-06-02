@@ -18,15 +18,16 @@
 //
 // DataTable result = new RecordSet<DataTable>(repository.GetConnection, "select * from Table", RecordSetResult.DataTable).Get().Result;
 //
-//ICollectionView result = new RecordSet<ICollectionView>(repository.GetConnection, sql, RecordSetResult.CollectionView).Get().Result;
+// ICollectionView result = new RecordSet<ICollectionView>(repository.GetConnection, sql, RecordSetResult.CollectionView).Get().Result;
 // </example>
 //-----------------------------------------------------------------------
 
-namespace Inventar.DatabaseCore
+namespace Inventar.Generator
 {
     using System.ComponentModel;
     using System.Data;
     using System.Data.SQLite;
+    using System.Reflection;
     using System.Text.RegularExpressions;
     using System.Windows.Data;
 
@@ -111,6 +112,7 @@ namespace Inventar.DatabaseCore
 
         public RecordSetResult ResultTyp { get; set; }
 
+        #region SET
         public RecordSet<T> Set()
         {
             try
@@ -120,11 +122,10 @@ namespace Inventar.DatabaseCore
                     throw new ArgumentException($"Der Typ '{typeof(T).Name}' ist für das Schreiben des RecordSet '{ResultTyp.ToString()}' nicht gültig.");
                 }
 
-                if (ResultTyp == RecordSetResult.Scalar)
+                if (ResultTyp == RecordSetResult.ExecuteNonQuery)
                 {
-                    this.Result = this.SetScalar();
+                    this.Result = this.SetExecuteNonQuery();
                 }
-
             }
             catch (Exception ex)
             {
@@ -135,6 +136,33 @@ namespace Inventar.DatabaseCore
             return this;
         }
 
+        private T SetExecuteNonQuery()
+        {
+            object getAs = null;
+
+            try
+            {
+                using (SQLiteCommand cmd = this.Connection.CreateCommand())
+                {
+                    cmd.CommandType = CommandType.Text;
+                    cmd.CommandText = this.SQL;
+                    int? result = cmd.ExecuteNonQuery();
+                    getAs = result == null ? default(T) : (T)Convert.ChangeType(result, typeof(T));
+                }
+
+            }
+            catch (Exception ex)
+            {
+                string ErrorText = ex.Message;
+                throw;
+            }
+
+            return (T)getAs;
+        }
+
+        #endregion SET
+
+        #region GET
         public RecordSet<T> Get()
         {
             try
@@ -159,6 +187,10 @@ namespace Inventar.DatabaseCore
                 else if (ResultTyp == RecordSetResult.DataTable)
                 {
                     this.Result = this.GetDataTable();
+                }
+                else if (ResultTyp == RecordSetResult.ListOfT)
+                {
+                    this.Result = this.GetListOfT();
                 }
             }
             catch (Exception ex)
@@ -216,7 +248,7 @@ namespace Inventar.DatabaseCore
                     DataTable dt = null;
                     using (SQLiteDataReader dr = cmd.ExecuteReader())
                     {
-                        if (dr.HasRows == true)
+                        if (dr.HasRows == true && dr.VisibleFieldCount > 0)
                         {
                             dt = new DataTable();
                             dt.Load(dr);
@@ -246,30 +278,6 @@ namespace Inventar.DatabaseCore
                     cmd.CommandType = CommandType.Text;
                     cmd.CommandText = this.SQL;
                     var result = cmd.ExecuteScalar();
-                    getAs = result == null ? default(T) : (T)Convert.ChangeType(result, typeof(T));
-                }
-
-            }
-            catch (Exception ex)
-            {
-                string ErrorText = ex.Message;
-                throw;
-            }
-
-            return (T)getAs;
-        }
-
-        private T SetScalar()
-        {
-            object getAs = null;
-
-            try
-            {
-                using (SQLiteCommand cmd = this.Connection.CreateCommand())
-                {
-                    cmd.CommandType = CommandType.Text;
-                    cmd.CommandText = this.SQL;
-                    int? result = cmd.ExecuteNonQuery();
                     getAs = result == null ? default(T) : (T)Convert.ChangeType(result, typeof(T));
                 }
 
@@ -314,6 +322,91 @@ namespace Inventar.DatabaseCore
             return (T)result;
         }
 
+        private T GetListOfT()
+        {
+            T result = default;
+
+            try
+            {
+                using (SQLiteCommand cmd = this.Connection.CreateCommand())
+                {
+                    cmd.CommandType = CommandType.Text;
+                    cmd.CommandText = this.SQL;
+
+                    using (SQLiteDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (dr.HasRows == true)
+                        {
+                            /* Typ für List<T> erstellen */
+                            Type typeCollection = typeof(T);
+                            result = (T)Activator.CreateInstance(typeCollection);
+
+                            while (dr.Read())
+                            {
+                                var columnCount = dr.FieldCount;
+
+                                /* Typ für List-Content erstellen */
+                                Type genericType = typeCollection.GetGenericArguments()[0];
+                                var instance = Activator.CreateInstance(genericType);
+                                if (instance != null)
+                                {
+                                    for (int i = 0; i < columnCount; i++)
+                                    {
+                                        string columnName = dr.GetName(i);
+                                        object columnValue = dr[i];
+                                        PropertyInfo itemProperty = instance.GetType().GetProperty(columnName);
+
+                                        if (itemProperty == null && itemProperty.CanWrite == true)
+                                        {
+                                            continue;
+                                        }
+
+                                        if (itemProperty.PropertyType == typeof(Guid))
+                                        {
+                                            itemProperty.SetValue(instance, new Guid(columnValue.ToString()), null);
+                                        }
+                                        else if (itemProperty.PropertyType == typeof(int))
+                                        {
+                                            itemProperty.SetValue(instance, dr.GetInt32(i), null);
+                                        }
+                                        else if (itemProperty.PropertyType == typeof(DateTime))
+                                        {
+                                            itemProperty.SetValue(instance, dr.GetDateTime(i), null);
+                                        }
+                                        else if (itemProperty.PropertyType == typeof(bool))
+                                        {
+                                            itemProperty.SetValue(instance, dr.GetBoolean(i), null);
+                                        }
+                                        else if (itemProperty.PropertyType == typeof(byte[]))
+                                        {
+                                            byte[] byteArray = (byte[])dr.GetValue(i);
+                                            itemProperty.SetValue(instance, byteArray, null);
+                                        }
+                                        else
+                                        {
+                                            itemProperty.SetValue(instance, columnValue, null);
+                                        }
+                                    }
+                                }
+
+                                /* Add Methode mit Content per Invoke erstellen */
+                                MethodInfo method = typeCollection.GetMethod("Add");
+                                method.Invoke(result, new object[] { instance });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                string ErrorText = ex.Message;
+                throw;
+            }
+
+            return (T)Convert.ChangeType(result, typeof(T));
+        }        
+        #endregion GET
+
         private string ExtractTablename(string sql)
         {
             try
@@ -348,30 +441,6 @@ namespace Inventar.DatabaseCore
             {
                 result = true;
             }
-            else if (type.Name == typeof(bool).Name)
-            {
-                result = true;
-            }
-            else if (type.Name == typeof(decimal).Name)
-            {
-                result = true;
-            }
-            else if (type.Name == typeof(double).Name)
-            {
-                result = true;
-            }
-            else if (type.Name == typeof(float).Name)
-            {
-                result = true;
-            }
-            else if (type.Name == typeof(string).Name)
-            {
-                result = true;
-            }
-            else if (type.Name == typeof(DateTime).Name)
-            {
-                result = true;
-            }
 
             return result;
         }
@@ -389,6 +458,10 @@ namespace Inventar.DatabaseCore
                 result = true;
             }
             else if (type.Name == typeof(ICollectionView).Name)
+            {
+                result = true;
+            }
+            else if (type.Name == typeof(List<>).Name)
             {
                 result = true;
             }
@@ -459,7 +532,11 @@ namespace Inventar.DatabaseCore
         CollectionView = 2,
         [Description("Als Ergebnis wird ein Feld aus der übergebenen SQL-Anweisung zurückgegeben")]
         Scalar = 3,
+        [Description("SQL-Anweisung ohne Rückgabe, nut Anzahl der betroffenen Datensätze")]
+        ExecuteNonQuery = 4,
         [Description("Als Ergebnis wird ein DataTable zurückgegeben")]
-        DataTable = 4,
+        DataTable = 5,
+        [Description("Als Ergebnis wird eine List<T> zurückgegeben")]
+        ListOfT = 6,
     }
 }

@@ -27,7 +27,9 @@ namespace Console.ExpSoftware
     using System.Linq;
     using System.Xml;
 
+    using Inventar.Database.Repository;
     using Inventar.DatabaseCore;
+    using Inventar.Generator;
     using Inventar.Model;
 
     public class Program
@@ -46,6 +48,7 @@ namespace Console.ExpSoftware
             ConsoleMenu.Add("03", "Tabellen Attachment füllen", () => MenuPoint03());
             ConsoleMenu.Add("04", "Tabellen Insert/Update Inventar", () => MenuPoint04());
             ConsoleMenu.Add("05", "Tabellen Delete Inventar", () => MenuPoint05());
+            ConsoleMenu.Add("06", "Repository", () => MenuPoint06());
             ConsoleMenu.Add("X", "Beenden", () => ApplicationExit());
 
             do
@@ -89,7 +92,7 @@ namespace Console.ExpSoftware
 
             if (File.Exists(databasePath) == false)
             {
-                Console.WriteLine($"Datenbank '{databasePath}' wurde noch nicht erstellt!!");
+                Console.WriteLine($"Datenbank '{databasePath}' wurde nicht gefunden oder erstellt!");
                 ConsoleMenu.Wait();
                 return;
             }
@@ -108,7 +111,7 @@ namespace Console.ExpSoftware
 
             if (File.Exists(databasePath) == false)
             {
-                Console.WriteLine($"Datenbank '{databasePath}' wurde noch nicht erstellt!!");
+                Console.WriteLine($"Datenbank '{databasePath}' wurde nicht gefunden oder erstellt!");
                 ConsoleMenu.Wait();
                 return;
             }
@@ -127,7 +130,7 @@ namespace Console.ExpSoftware
 
             if (File.Exists(databasePath) == false)
             {
-                Console.WriteLine($"Datenbank '{databasePath}' wurde noch nicht erstellt!!");
+                Console.WriteLine($"Datenbank '{databasePath}' wurde nicht gefunden oder erstellt!");
                 ConsoleMenu.Wait();
                 return;
             }
@@ -146,7 +149,7 @@ namespace Console.ExpSoftware
 
             if (File.Exists(databasePath) == false)
             {
-                Console.WriteLine($"Datenbank '{databasePath}' wurde noch nicht erstellt!!");
+                Console.WriteLine($"Datenbank '{databasePath}' wurde nicht gefunden oder erstellt!");
                 ConsoleMenu.Wait();
                 return;
             }
@@ -154,6 +157,57 @@ namespace Console.ExpSoftware
             using (DatabaseService ds = new DatabaseService(databasePath))
             {
                 ds.Delete(DeleteInventarRow);
+            }
+
+            ConsoleMenu.Wait();
+        }
+
+        private static void MenuPoint06()
+        {
+            Console.Clear();
+
+            using (InventarRepository<Inventars> repository = new InventarRepository<Inventars>())
+            {
+                if (repository.Exist() == false)
+                {
+                    Console.WriteLine($"Datenbank '{databasePath}' wurde nicht gefunden oder erstellt!");
+                    ConsoleMenu.Wait();
+                    return;
+                }
+
+                int countAll = repository.Count();
+                if (countAll == 0)
+                {
+                    Inventars inv = new Inventars("Münzen 10 DM", new DateTime(1986, 1, 1), 560.00M);
+                    repository.Add(inv);
+
+                    inv = new Inventars("Münzen 5 DM", new DateTime(1960, 1, 1), 450.00M);
+                    repository.Add(inv);
+
+                    inv = new Inventars("Münzen verschiedene Länder", new DateTime(1975, 1, 1), 310.66M);
+                    repository.Add(inv);
+                }
+                else
+                {
+                    repository.DeleteAll();
+                }
+
+                    countAll = repository.Count();
+                if (countAll > 0)
+                {
+                    Inventars inv0 = repository.Select().FirstOrDefault();
+                    Console.WriteLine($"(Vor Update) Ablageort: {inv0.Ablageort}");
+
+                    inv0.Ablageort = "Im Tresor";
+
+                    repository.Update(inv0);
+
+                    Inventars inv1 = repository.Select().FirstOrDefault();
+                    Console.WriteLine($"(nach Update) Ablageort: {inv1.Ablageort}");
+
+                    repository.Delete(inv1);
+                    countAll = repository.Count();
+                }
             }
 
             ConsoleMenu.Wait();

@@ -14,7 +14,7 @@
 // </summary>
 //-----------------------------------------------------------------------
 
-namespace Inventar.DatabaseCore
+namespace Inventar.Generator
 {
     public enum SQLComparison
     {

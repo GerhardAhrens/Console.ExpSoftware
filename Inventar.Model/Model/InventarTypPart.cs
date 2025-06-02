@@ -15,9 +15,7 @@
 
 namespace Inventar.Model
 {
-    using System;
-
-    using Inventar.DatabaseCore;
+    using Inventar.Generator;
 
     public sealed partial class InventarTyp
     {

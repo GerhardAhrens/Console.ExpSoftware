@@ -18,7 +18,7 @@ namespace Inventar.Model
     using System;
     using System.ComponentModel;
 
-    using Inventar.DatabaseCore;
+    using Inventar.Generator;
 
     [DataTable("TAB_Inventar")]
     public sealed partial class Inventars
@@ -56,6 +56,9 @@ namespace Inventar.Model
         [ColumnIndex("InventarTyp","InvTyp",ListSortDirection.Ascending)]
         [TableColumn(SQLiteDataType.Integer)]
         public int InventarTyp { get; set; }
+
+        [TableColumn(SQLiteDataType.Text, 50)]
+        public string Ablageort { get; set; }
 
         [TableColumn(SQLiteDataType.Boolean)]
         public bool IsActive { get; set; }
