@@ -55,7 +55,10 @@ namespace Inventar.Database.Repository
 
             try
             {
-                Dictionary<int, string> invDict = base.Connection.RecordSet<Dictionary<int, string>>($"SELECT typ,name FROM {this.Tablename}").Get().Result;
+                //Dictionary<int, string> invDict = base.Connection.RecordSet<Dictionary<int, string>>($"SELECT typ,name FROM {this.Tablename}").Get().Result;
+                List<string> invListString = base.Connection.RecordSet<List<string>>($"SELECT name FROM {this.Tablename}").Get().Result;
+                List<int> invListInt = base.Connection.RecordSet<List<int>>($"SELECT typ FROM {this.Tablename}").Get().Result;
+                List<Guid> invListGuid = base.Connection.RecordSet<List<Guid>>($"SELECT id FROM {this.Tablename}").Get().Result;
 
                 result = base.Connection.RecordSet<List<InventarTyp>>($"SELECT * FROM {this.Tablename}").Get().Result;
             }

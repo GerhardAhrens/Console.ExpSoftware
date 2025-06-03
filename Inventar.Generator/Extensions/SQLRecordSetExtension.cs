@@ -13,6 +13,7 @@
 
 namespace System.Data.SQLite
 {
+    using System.Collections;
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.Reflection;
@@ -148,9 +149,13 @@ namespace System.Data.SQLite
                 {
                     resultValue = GetDataTable<T>(@this.Connection, @this.SQL, @this.ParameterCollection);
                 }
-                else if (typeof(T).IsGenericType == true && typeof(T).GetGenericTypeDefinition() == typeof(List<>))
+                else if (typeof(T).IsGenericType == true && typeof(T).GetGenericTypeDefinition() == typeof(List<>) && typeof(T).GetGenericArguments()[0].Namespace != "System")
                 {
-                    resultValue = GetListOfT<T>(@this.Connection, @this.SQL, @this.ParameterCollection);
+                    resultValue = GetListOfTGeneric<T>(@this.Connection, @this.SQL, @this.ParameterCollection);
+                }
+                else if (typeof(T).IsGenericType == true && typeof(T).GetGenericTypeDefinition() == typeof(List<>) && typeof(T).GetGenericArguments()[0].Namespace == "System")
+                {
+                    resultValue = GetListOfTNonGeneric<T>(@this.Connection, @this.SQL, @this.ParameterCollection);
                 }
                 else if (typeof(T).IsGenericType == true && typeof(T).GetGenericTypeDefinition() == typeof(Dictionary<,>))
                 {
@@ -423,7 +428,7 @@ namespace System.Data.SQLite
             return (T)result;
         }
 
-        private static T GetListOfT<T>(SQLiteConnection connection, string sql, Dictionary<string, object> parameterCollection)
+        private static T GetListOfTGeneric<T>(SQLiteConnection connection, string sql, Dictionary<string, object> parameterCollection)
         {
             T result = default;
 
@@ -534,6 +539,91 @@ namespace System.Data.SQLite
                                 /* Add Methode mit Content per Invoke erstellen */
                                 MethodInfo method = typeCollection.GetMethod("Add");
                                 method.Invoke(result, new object[] { instance });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (SQLiteException ex)
+            {
+                string ErrorText = ex.Message;
+                throw;
+            }
+            catch (Exception ex)
+            {
+                string ErrorText = ex.Message;
+                throw;
+            }
+
+            return (T)Convert.ChangeType(result, typeof(T));
+        }
+
+        private static T GetListOfTNonGeneric<T>(SQLiteConnection connection, string sql, Dictionary<string, object> parameterCollection)
+        {
+            IList result = default;
+
+            try
+            {
+                using (SQLiteCommand cmd = connection.CreateCommand())
+                {
+                    cmd.CommandType = CommandType.Text;
+                    cmd.CommandText = sql;
+                    if (parameterCollection != null && parameterCollection.Count > 0)
+                    {
+                        cmd.Parameters.Clear();
+                        foreach (KeyValuePair<string, object> item in parameterCollection)
+                        {
+                            cmd.Parameters.AddWithValue(item.Key, item.Value);
+                        }
+
+                        foreach (SQLiteParameter parameter in cmd.Parameters)
+                        {
+                            if (parameter.IsNullable == false)
+                            {
+                                if (parameter.DbType.ToString() == typeof(DateTime).Name)
+                                {
+                                    if ((DateTime)parameter.Value == DateTime.MinValue)
+                                    {
+                                        parameter.Value = new DateTime(1900, 1, 1);
+                                    }
+                                }
+                                else
+                                {
+                                    if (parameter.Value == DBNull.Value || parameter.Value == null)
+                                    {
+                                        parameter.Value = DBNull.Value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    using (SQLiteDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (dr.HasRows == true)
+                        {
+                            /* Typ für List<T> erstellen */
+                            Type genericListType = typeof(List<>);
+                            Type genericType = typeof(T).GetGenericArguments()[0];
+                            Type concreteListType = genericListType.MakeGenericType(genericType);
+                            result = Activator.CreateInstance(concreteListType) as IList;
+
+                            while (dr.Read())
+                            {
+                                int columnCount = dr.FieldCount;
+
+                                if (result != null)
+                                {
+                                    string valueName = dr.GetName(0);
+                                    if (genericType == typeof(Guid))
+                                    {
+                                        result.Add(Convert.ChangeType(new Guid(dr[0].ToString()), genericType));
+                                    }
+                                    else
+                                    {
+                                        result.Add(Convert.ChangeType(dr[0], genericType));
+                                    }
+                                }
                             }
                         }
                     }
