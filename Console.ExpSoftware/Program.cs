@@ -36,19 +36,23 @@ namespace Console.ExpSoftware
     {
         private static string databasePath = string.Empty;
         private static string attachmentPath = string.Empty;
+        private static string attachmentPath2 = string.Empty;
 
         private static void Main(string[] args)
         {
             string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
             databasePath = Path.Combine(new DirectoryInfo(currentDirectory).Parent.Parent.Parent.FullName, "_DemoData", "Inventar.db");
             attachmentPath = Path.Combine(new DirectoryInfo(currentDirectory).Parent.Parent.Parent.FullName, "_DemoData", "AttachmentDemo.png");
+            attachmentPath2 = Path.Combine(new DirectoryInfo(currentDirectory).Parent.Parent.Parent.FullName, "_DemoData", "AttachmentDemo2.png");
 
             ConsoleMenu.Add("01", "Erstellen Datenbank und Tabelle", () => MenuPoint01());
             ConsoleMenu.Add("02", "Tabellen InventarTyp füllen", () => MenuPoint02());
             ConsoleMenu.Add("03", "Tabellen Attachment füllen", () => MenuPoint03());
             ConsoleMenu.Add("04", "Tabellen Insert/Update Inventar", () => MenuPoint04());
             ConsoleMenu.Add("05", "Tabellen Delete Inventar", () => MenuPoint05());
-            ConsoleMenu.Add("06", "Repository", () => MenuPoint06());
+            ConsoleMenu.Add("06", "Repository Inventar", () => MenuPoint06());
+            ConsoleMenu.Add("07", "Repository Attachment", () => MenuPoint07());
+            ConsoleMenu.Add("08", "Repository Inventar Typen", () => MenuPoint08());
             ConsoleMenu.Add("X", "Beenden", () => ApplicationExit());
 
             do
@@ -179,20 +183,34 @@ namespace Console.ExpSoftware
                 if (countAll == 0)
                 {
                     Inventars inv = new Inventars("Münzen 10 DM", new DateTime(1986, 1, 1), 560.00M);
+                    inv.InventarTyp = 2;
                     repository.Add(inv);
 
                     inv = new Inventars("Münzen 5 DM", new DateTime(1960, 1, 1), 450.00M);
+                    inv.InventarTyp = 2;
+                    repository.Add(inv);
+
+                    inv = new Inventars("Münzen 10 EUR", new DateTime(2001, 1, 1), 250.00M);
+                    inv.InventarTyp = 2;
                     repository.Add(inv);
 
                     inv = new Inventars("Münzen verschiedene Länder", new DateTime(1975, 1, 1), 310.66M);
+                    inv.InventarTyp = 2;
+                    repository.Add(inv);
+
+                    inv = new Inventars("Casio Wave Ceptor", new DateTime(2018, 6, 28), 298.85M);
+                    inv.Ablageort = "in gebrauch";
+                    inv.InventarTyp = 4;
                     repository.Add(inv);
                 }
                 else
                 {
+                    IEnumerable<Inventars> inventars = repository.Select();
+                    IEnumerable<Inventars> inventarTyp = repository.SelectByInventarTyp(1);
                     repository.DeleteAll();
                 }
 
-                    countAll = repository.Count();
+                countAll = repository.Count();
                 if (countAll > 0)
                 {
                     Inventars inv0 = repository.Select().FirstOrDefault();
@@ -207,6 +225,92 @@ namespace Console.ExpSoftware
 
                     repository.Delete(inv1);
                     countAll = repository.Count();
+                }
+            }
+
+            ConsoleMenu.Wait();
+        }
+
+        private static void MenuPoint07()
+        {
+            Console.Clear();
+
+            using (AttachmentRepository<Attachments> repository = new AttachmentRepository<Attachments>())
+            {
+                if (repository.Exist() == false)
+                {
+                    Console.WriteLine($"Datenbank '{databasePath}' wurde nicht gefunden oder erstellt!");
+                    ConsoleMenu.Wait();
+                    return;
+                }
+
+                int countAll = repository.Count();
+                if (countAll == 0)
+                {
+                    Attachments attachments = new Attachments();
+                    attachments.Content = File.ReadAllBytes(attachmentPath);
+                    attachments.FileExtension = Path.GetExtension(attachmentPath);
+                    attachments.Filename = Path.GetFileName(attachmentPath);
+                    attachments.FileSize = new FileInfo(attachmentPath).Length;
+                    attachments.FileDateTime = new FileInfo(attachmentPath).LastWriteTime;
+                    repository.Add(attachments);
+
+                    attachments = new Attachments();
+                    attachments.Content = File.ReadAllBytes(attachmentPath2);
+                    attachments.FileExtension = Path.GetExtension(attachmentPath2);
+                    attachments.Filename = Path.GetFileName(attachmentPath2);
+                    attachments.FileSize = new FileInfo(attachmentPath2).Length;
+                    attachments.FileDateTime = new FileInfo(attachmentPath2).LastWriteTime;
+                    repository.Add(attachments);
+                }
+                else
+                {
+                    //repository.DeleteAll();
+                    IEnumerable<Attachments> attachments = repository.Select();
+                }
+            }
+
+            ConsoleMenu.Wait();
+        }
+
+        private static void MenuPoint08()
+        {
+            Console.Clear();
+
+            using (InventarTypRepository<InventarTyp> repository = new InventarTypRepository<InventarTyp>())
+            {
+                if (repository.Exist() == false)
+                {
+                    Console.WriteLine($"Datenbank '{databasePath}' wurde nicht gefunden oder erstellt!");
+                    ConsoleMenu.Wait();
+                    return;
+                }
+
+                int countAll = repository.Count();
+                if (countAll == 0)
+                {
+                    InventarTyp invTyp = new InventarTyp("Keine Auswahl", 1);
+                    repository.Add(invTyp);
+
+                    invTyp = new InventarTyp("Münzen, Medaillen, Brifmarken", 2);
+                    repository.Add(invTyp);
+
+                    invTyp = new InventarTyp("Schmuck, Minerale, Edelsteine", 3);
+                    repository.Add(invTyp);
+
+                    invTyp = new InventarTyp("Uhren", 4);
+                    repository.Add(invTyp);
+
+                    invTyp = new InventarTyp("Dokumente", 5);
+                    repository.Add(invTyp);
+
+                    invTyp = new InventarTyp("Bilder", 6);
+                    repository.Add(invTyp);
+                }
+                else
+                {
+                    //repository.DeleteAll();
+                    IEnumerable<InventarTyp> inventarTypen = repository.Select();
                 }
             }
 

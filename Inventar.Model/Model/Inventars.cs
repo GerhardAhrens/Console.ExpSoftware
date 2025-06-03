@@ -17,17 +17,18 @@ namespace Inventar.Model
 {
     using System;
     using System.ComponentModel;
+    using System.Diagnostics;
 
     using Inventar.Generator;
 
+    [DebuggerDisplay("{this.FullName}")]
     [DataTable("TAB_Inventar")]
     public sealed partial class Inventars
     {
         private DateTime _GekauftAm;
 
-        public Inventars()
-        {
-        }
+        public Inventars() { }
+
         public Inventars(string name, DateTime gekauftAm, decimal kaufBetrag)
         {
             this.Id = Guid.NewGuid();

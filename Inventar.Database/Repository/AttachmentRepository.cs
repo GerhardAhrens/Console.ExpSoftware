@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------
-// <copyright file="InventarRepository.cs" company="Lifeprojects.de">
-//     Class: InventarRepository
+// <copyright file="AttachmentRepository.cs" company="Lifeprojects.de">
+//     Class: AttachmentRepository
 //     Copyright © Lifeprojects.de 2025
 // </copyright>
 //
@@ -22,9 +22,9 @@ namespace Inventar.Database.Repository
     using Inventar.Generator;
     using Inventar.Model;
 
-    public class InventarRepository<TEntity> : RepositoryBase<TEntity>
+    public class AttachmentRepository<TEntity> : RepositoryBase<TEntity>
     {
-        public InventarRepository()
+        public AttachmentRepository()
         {
            this.Tablename = base.DataTableName();
         }
@@ -37,7 +37,7 @@ namespace Inventar.Database.Repository
 
             try
             {
-                result = base.Connection.RecordSet<int>($"select count(*) from {this.Tablename}").Get().Result;
+                result = new RecordSet<int>(base.Connection, $"select count(*) from {this.Tablename}").Get().Result;
             }
             catch (Exception ex)
             {
@@ -48,13 +48,13 @@ namespace Inventar.Database.Repository
             return result;
         }
 
-        public IEnumerable<Inventars> Select()
+        public IEnumerable<TEntity> Select()
         {
-            List<Inventars> result = null;
+            List<TEntity> result = null;
 
             try
             {
-                result = base.Connection.RecordSet<List<Inventars>>($"select * from {this.Tablename}").Get().Result;
+                result = new RecordSet<List<TEntity>>(base.Connection, $"select * from {this.Tablename}").Get().Result;
             }
             catch (Exception ex)
             {
@@ -65,33 +65,15 @@ namespace Inventar.Database.Repository
             return result;
         }
 
-        public IEnumerable<Inventars> SelectByInventarTyp(int inventarTyp)
+        public void Add(Attachments entity)
         {
-            List<Inventars> result = null;
-
             try
             {
+                SQLGenerator<Attachments> insert = new SQLGenerator<Attachments>(entity);
+                string resultSql = insert.Insert().ToSql();
                 Dictionary<string, object> parameterCollection = new Dictionary<string, object>();
-                parameterCollection.Add("@InventarTyp", inventarTyp);
-
-                result = base.Connection.RecordSet<List<Inventars>>($"select * from {this.Tablename} WHERE (InventarTyp = @InventarTyp)", parameterCollection).Get().Result;
-            }
-            catch (Exception ex)
-            {
-                string errorText = ex.Message;
-                throw;
-            }
-
-            return result;
-        }
-
-        public void Add(TEntity entity)
-        {
-            try
-            {
-                SQLGenerator<TEntity> insertInv = new SQLGenerator<TEntity>(entity);
-                string resultSql = insertInv.Insert().ToSql();
-                base.Connection.CmdExecuteNonQuery(resultSql);
+                parameterCollection.Add("@Content", entity.Content);
+                base.Connection.CmdExecuteNonQuery(resultSql, parameterCollection);
             }
             catch (Exception ex)
             {
@@ -100,13 +82,15 @@ namespace Inventar.Database.Repository
             }
         }
 
-        public void Update(Inventars entity)
+        public void Update(Attachments entity)
         {
             try
             {
-                SQLGenerator<Inventars> updateInv = new SQLGenerator<Inventars>(entity);
+                SQLGenerator<Attachments> updateInv = new SQLGenerator<Attachments>(entity);
                 string resultSql = updateInv.Update().Where(w => w.Id, SQLComparison.Equals, entity.Id).ToSql();
-                base.Connection.CmdExecuteNonQuery(resultSql);
+                Dictionary<string, object> parameterCollection = new Dictionary<string, object>();
+                parameterCollection.Add("@Content", entity.Content);
+                base.Connection.CmdExecuteNonQuery(resultSql, parameterCollection);
             }
             catch (Exception ex)
             {
@@ -115,7 +99,7 @@ namespace Inventar.Database.Repository
             }
         }
 
-        public int Delete(Inventars entity)
+        public int Delete(Attachments entity)
         {
             int result = 0;
 

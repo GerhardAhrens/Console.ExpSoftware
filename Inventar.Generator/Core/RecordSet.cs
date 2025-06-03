@@ -42,7 +42,7 @@ namespace Inventar.Generator
         /// <param name="sql">SQL Anweisung</param>
         /// <param name="resultTyp">Ergebnis Typ</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public RecordSet(SQLiteConnection connection, string sql, RecordSetResult resultTyp = RecordSetResult.DataTable)
+        public RecordSet(SQLiteConnection connection, string sql)
         {
             if (connection == null)
             {
@@ -58,44 +58,6 @@ namespace Inventar.Generator
             {
                 this.Connection = connection;
                 this.SQL = sql;
-                this.ResultTyp = resultTyp;
-            }
-            catch (Exception ex)
-            {
-                string ErrorText = ex.Message;
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RecordSet"/> class.
-        /// </summary>
-        /// <param name="connection">Connection Objekt zur Datenbank</param>
-        /// <exception cref="ArgumentNullException"></exception>
-        public RecordSet(SQLiteConnection connection)
-        {
-            if (connection == null)
-            {
-                throw new ArgumentNullException("Das Connection-Objekt darf nicht 'null' sein");
-            }
-
-            try
-            {
-                this.Connection = connection;
-                this.ResultTyp = RecordSetResult.DataTable;
-            }
-            catch (Exception ex)
-            {
-                string ErrorText = ex.Message;
-                throw;
-            }
-        }
-
-        public RecordSet()
-        {
-            try
-            {
-                this.ResultTyp = RecordSetResult.DataTable;
             }
             catch (Exception ex)
             {
@@ -110,8 +72,6 @@ namespace Inventar.Generator
 
         public string SQL { get; set; }
 
-        public RecordSetResult ResultTyp { get; set; }
-
         #region SET
         public RecordSet<T> Set()
         {
@@ -119,10 +79,10 @@ namespace Inventar.Generator
             {
                 if (this.CheckSetResultParameter(typeof(T)) == false)
                 {
-                    throw new ArgumentException($"Der Typ '{typeof(T).Name}' ist für das Schreiben des RecordSet '{ResultTyp.ToString()}' nicht gültig.");
+                    throw new ArgumentException($"Der Typ '{typeof(T).Name}' ist für das Schreiben des RecordSet nicht gültig.");
                 }
 
-                if (ResultTyp == RecordSetResult.ExecuteNonQuery)
+                if (typeof(T).IsGenericType == false)
                 {
                     this.Result = this.SetExecuteNonQuery();
                 }
@@ -169,26 +129,26 @@ namespace Inventar.Generator
             {
                 if (this.CheckGetResultParameter(typeof(T)) == false)
                 {
-                    throw new ArgumentException($"Der Typ '{typeof(T).Name}' ist für die Rückgabe des RecordSet Result beim '{ResultTyp.ToString()}' nicht gültig.");
+                    throw new ArgumentException($"Der Typ '{typeof(T).Name}' ist für die Rückgabe des RecordSet Result nicht gültig.");
                 }
 
-                if (ResultTyp == RecordSetResult.DataRow)
+                if (typeof(T) == typeof(DataRow))
                 {
                     this.Result = this.GetSingle();
                 }
-                else if (ResultTyp == RecordSetResult.CollectionView)
+                else if (typeof(T) == typeof(ICollectionView))
                 {
                     this.Result = this.GetCollectionView();
                 }
-                else if (ResultTyp == RecordSetResult.Scalar)
+                else if (typeof(T).IsGenericType == false && typeof(T).IsPrimitive == true && typeof(T).Namespace == "System")
                 {
                     this.Result = this.GetScalar();
                 }
-                else if (ResultTyp == RecordSetResult.DataTable)
+                else if (typeof(T) == typeof(DataTable))
                 {
                     this.Result = this.GetDataTable();
                 }
-                else if (ResultTyp == RecordSetResult.ListOfT)
+                else if (typeof(T).IsGenericType == true && typeof(T).GetGenericTypeDefinition() == typeof(List<>))
                 {
                     this.Result = this.GetListOfT();
                 }
@@ -356,7 +316,7 @@ namespace Inventar.Generator
                                         object columnValue = dr[i];
                                         PropertyInfo itemProperty = instance.GetType().GetProperty(columnName);
 
-                                        if (itemProperty == null && itemProperty.CanWrite == true)
+                                        if (itemProperty == null && itemProperty.CanWrite == false)
                                         {
                                             continue;
                                         }
@@ -368,6 +328,10 @@ namespace Inventar.Generator
                                         else if (itemProperty.PropertyType == typeof(int))
                                         {
                                             itemProperty.SetValue(instance, dr.GetInt32(i), null);
+                                        }
+                                        else if (itemProperty.PropertyType == typeof(long))
+                                        {
+                                            itemProperty.SetValue(instance, Convert.ToInt64(columnValue), null);
                                         }
                                         else if (itemProperty.PropertyType == typeof(DateTime))
                                         {
@@ -514,29 +478,14 @@ namespace Inventar.Generator
             {
                 if (classDisposing)
                 {
+                    this.Result = default;
+                    this.Connection = null;
+                    this.SQL = null;
                 }
             }
 
             this.classIsDisposed = true;
         }
         #endregion Dispose Function
-    }
-
-    public enum RecordSetResult : int
-    {
-        [Description("Keine Aktion")]
-        None = 0,
-        [Description("Als Ergebnis wird ein DataRow zurückgegeben")]
-        DataRow = 1,
-        [Description("Als Ergebnis wird eine ICollectionView zurückgegeben")]
-        CollectionView = 2,
-        [Description("Als Ergebnis wird ein Feld aus der übergebenen SQL-Anweisung zurückgegeben")]
-        Scalar = 3,
-        [Description("SQL-Anweisung ohne Rückgabe, nut Anzahl der betroffenen Datensätze")]
-        ExecuteNonQuery = 4,
-        [Description("Als Ergebnis wird ein DataTable zurückgegeben")]
-        DataTable = 5,
-        [Description("Als Ergebnis wird eine List<T> zurückgegeben")]
-        ListOfT = 6,
     }
 }

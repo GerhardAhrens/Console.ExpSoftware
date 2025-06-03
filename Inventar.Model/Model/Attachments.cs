@@ -16,9 +16,11 @@
 namespace Inventar.Model
 {
     using System;
+    using System.Diagnostics;
 
     using Inventar.Generator;
 
+    [DebuggerDisplay("{this.FullName}")]
     [DataTable("TAB_Attachment")]
     public sealed partial class Attachments
     {

@@ -16,4 +16,13 @@
       <ProjectReference Include="..\Inventar.Model\Inventar.Model.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Update="Repository\InventarTypRepository.cs">
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Repository\AttachmentRepository.cs">
+        <SubType>Code</SubType>
+      </Compile>
+    </ItemGroup>
+
 </Project>

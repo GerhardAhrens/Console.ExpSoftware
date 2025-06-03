@@ -16,12 +16,21 @@
 namespace Inventar.Model
 {
     using System;
+    using System.Diagnostics;
 
     using Inventar.Generator;
 
+    [DebuggerDisplay("{this.FullName}")]
     [DataTable("TAB_InventarTyp")]
     public sealed partial class InventarTyp
     {
+        public InventarTyp()
+        {
+            this.Id = Guid.NewGuid();
+            this.CreatedBy = UserInfo.TS().CurrentUser;
+            this.CreatedOn = UserInfo.TS().CurrentTime;
+        }
+
         public InventarTyp(string name, int typ)
         {
             this.Id = Guid.NewGuid();
@@ -34,7 +43,7 @@ namespace Inventar.Model
 
         [PrimaryKey]
         [TableColumn(SQLiteDataType.Guid)]
-        public Guid Id { get; }
+        public Guid Id { get; private set; }
 
         [TableColumn(SQLiteDataType.Text, 50)]
         public string Name { get; set; }
