@@ -17,7 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Core\" />
+    <Folder Include="Core\Helpers\" />
+    <Folder Include="Core\WriteLine\" />
     <Folder Include="_DemoData\" />
   </ItemGroup>
 

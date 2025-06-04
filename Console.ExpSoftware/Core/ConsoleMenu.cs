@@ -63,18 +63,6 @@ namespace Console.ExpSoftware
             Console.CursorVisible = true;
         }
 
-        public static void Print(string text, ConsoleColor setColor = ConsoleColor.White)
-        {
-            ConsoleColor defaultColor = Console.ForegroundColor;
-            Console.ForegroundColor = setColor;
-            Console.CursorVisible = false;
-
-            Console.WriteLine(text);
-
-            Console.ForegroundColor = defaultColor;
-            Console.CursorVisible = true;
-        }
-
         public static void Continue(string text = "")
         {
             ConsoleColor defaultColor = Console.ForegroundColor;
@@ -101,22 +89,12 @@ namespace Console.ExpSoftware
             Console.CursorVisible = true;
         }
 
-        public static void Titel(string text)
-        {
-            ConsoleColor defaultColor = Console.ForegroundColor;
-
-            Console.Write('\n');
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"{text}");
-            Console.ForegroundColor = defaultColor;
-        }
-
         public static string SelectKey(int left = 0, int top = 0)
         {
             string resultKeys = string.Empty;
             ConsoleColor defaultColor = Console.ForegroundColor;
 
-            Console.Clear();
+            /*Console.Clear();*/
             Console.SetCursorPosition(left, top);
             int topStep = -1;
             foreach (KeyValuePair<string, Tuple<string, Action>> mtext in menuList)

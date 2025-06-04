@@ -16,6 +16,8 @@
 // </summary>
 //-----------------------------------------------------------------------
 
+using ConsoleN;
+
 namespace Console.ExpSoftware
 {
     /* Imports from NET Framework */
@@ -32,6 +34,8 @@ namespace Console.ExpSoftware
     using Inventar.DatabaseCore;
     using Inventar.Generator;
     using Inventar.Model;
+
+    using Console = ConsoleN.Console;
 
     public class Program
     {
@@ -59,6 +63,8 @@ namespace Console.ExpSoftware
 
             do
             {
+                Console.Clear();
+                Console.Titel("Menüauswahl");
                 _ = ConsoleMenu.SelectKey(2, 2);
             }
             while (true);
@@ -324,7 +330,7 @@ namespace Console.ExpSoftware
             Console.Clear();
             string sqlStatment = string.Empty;
 
-            ConsoleMenu.Titel("Select alle Spalten");
+            Console.Titel("Select alle Spalten");
             using (DynamicSQLBuilder query = new DynamicSQLBuilder())
             {
                 query.SelectFromTable("TAB_Inventar");
@@ -334,7 +340,7 @@ namespace Console.ExpSoftware
 
             ConsoleMenu.Continue(sqlStatment);
 
-            ConsoleMenu.Titel("Select alle Spalten und Order By");
+            Console.Titel("Select alle Spalten und Order By");
             using (DynamicSQLBuilder query = new DynamicSQLBuilder())
             {
                 query.SelectFromTable("TAB_Inventar");
@@ -345,7 +351,7 @@ namespace Console.ExpSoftware
 
             ConsoleMenu.Continue(sqlStatment);
 
-            ConsoleMenu.Titel("Select alle Spalten und Where-Bedingung");
+            Console.Titel("Select alle Spalten und Where-Bedingung");
             using (DynamicSQLBuilder query = new DynamicSQLBuilder())
             {
                 query.SelectFromTable("TAB_Inventar");
@@ -356,7 +362,7 @@ namespace Console.ExpSoftware
 
             ConsoleMenu.Continue(sqlStatment);
 
-            ConsoleMenu.Titel("Select alle Spalten und Where-Or-Bedingung");
+            Console.Titel("Select alle Spalten und Where-Or-Bedingung");
             using (DynamicSQLBuilder query = new DynamicSQLBuilder())
             {
                 WhereClause wcId = new WhereClause("Typ", SqlComparison.Equals, 1);
@@ -370,7 +376,7 @@ namespace Console.ExpSoftware
 
             ConsoleMenu.Continue(sqlStatment);
 
-            ConsoleMenu.Wait();
+            Console.Wait();
         }
         private static void CreateTableInDB(SQLiteConnection sqliteConnection)
         {
