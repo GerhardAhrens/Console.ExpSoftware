@@ -91,7 +91,7 @@ namespace Inventar.Database.Repository
             try
             {
                 SQLGenerator<InventarTyp> updateInv = new SQLGenerator<InventarTyp>(entity);
-                string resultSql = updateInv.Update().Where(w => w.Id, SQLComparison.Equals, entity.Id).ToSql();
+                string resultSql = updateInv.Update().Where(w => w.Id, SqlComparison.Equals, entity.Id).ToSql();
                 base.Connection.CmdExecuteNonQuery(resultSql);
             }
             catch (Exception ex)

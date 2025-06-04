@@ -16,7 +16,7 @@
 
 namespace Inventar.Generator
 {
-    public enum SQLComparison
+    public enum SqlComparison
     {
         None = 0,
         Equals,

@@ -75,6 +75,42 @@ namespace Console.ExpSoftware
             Console.CursorVisible = true;
         }
 
+        public static void Continue(string text = "")
+        {
+            ConsoleColor defaultColor = Console.ForegroundColor;
+
+            Console.CursorVisible = false;
+            if (string.IsNullOrEmpty(text) == true)
+            {
+                Console.Write('\n');
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Eine Taste für weiter drücken!");
+                Console.ForegroundColor = defaultColor;
+            }
+            else
+            {
+                Console.Write('\n');
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine($"{text}");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Eine Taste für weiter drücken!");
+                Console.ForegroundColor = defaultColor;
+            }
+
+            Console.ReadKey();
+            Console.CursorVisible = true;
+        }
+
+        public static void Titel(string text)
+        {
+            ConsoleColor defaultColor = Console.ForegroundColor;
+
+            Console.Write('\n');
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"{text}");
+            Console.ForegroundColor = defaultColor;
+        }
+
         public static string SelectKey(int left = 0, int top = 0)
         {
             string resultKeys = string.Empty;

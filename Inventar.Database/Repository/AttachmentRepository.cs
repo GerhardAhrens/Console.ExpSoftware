@@ -87,7 +87,7 @@ namespace Inventar.Database.Repository
             try
             {
                 SQLGenerator<Attachments> updateInv = new SQLGenerator<Attachments>(entity);
-                string resultSql = updateInv.Update().Where(w => w.Id, SQLComparison.Equals, entity.Id).ToSql();
+                string resultSql = updateInv.Update().Where(w => w.Id, SqlComparison.Equals, entity.Id).ToSql();
                 Dictionary<string, object> parameterCollection = new Dictionary<string, object>();
                 parameterCollection.Add("@Content", entity.Content);
                 base.Connection.CmdExecuteNonQuery(resultSql, parameterCollection);

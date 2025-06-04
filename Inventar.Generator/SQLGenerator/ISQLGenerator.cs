@@ -29,9 +29,9 @@ namespace Inventar.Generator
         ISQLGenerator<TEntity> Distinct();
         ISQLGenerator<TEntity> Take(int limit);
 
-        ISQLGenerator<TEntity> Where(Expression<Func<TEntity, object>> expressions, SQLComparison sqlOperator, object value);
-        ISQLGenerator<TEntity> AddWhereAnd(Expression<Func<TEntity, object>> expressions, SQLComparison sqlOperator, object value = null);
-        ISQLGenerator<TEntity> AddWhereOr(SQLComparison sqlOperator, object value);
+        ISQLGenerator<TEntity> Where(Expression<Func<TEntity, object>> expressions, SqlComparison sqlOperator, object value);
+        ISQLGenerator<TEntity> AddWhereAnd(Expression<Func<TEntity, object>> expressions, SqlComparison sqlOperator, object value = null);
+        ISQLGenerator<TEntity> AddWhereOr(SqlComparison sqlOperator, object value);
         ISQLGenerator<TEntity> AddBetween(Expression<Func<TEntity, object>> expressions, object valueLow, object valueHigh);
         ISQLGenerator<TEntity> AddNotBetween(Expression<Func<TEntity, object>> expressions, object valueLow, object valueHigh);
         ISQLGenerator<TEntity> AddIn(Expression<Func<TEntity, object>> expressions, params object[] values);
@@ -42,8 +42,8 @@ namespace Inventar.Generator
         ISQLGenerator<TEntity> AddIsNull(Expression<Func<TEntity, object>> expressions);
         ISQLGenerator<TEntity> AddIsNotNull(Expression<Func<TEntity, object>> expressions);
 
-        ISQLGenerator<TEntity> OrderBy(Expression<Func<TEntity, object>> expressions, SQLSorting sorting = SQLSorting.Ascending);
-        ISQLGenerator<TEntity> AndOrderBy(Expression<Func<TEntity, object>> expressions, SQLSorting sorting = SQLSorting.Ascending);
+        ISQLGenerator<TEntity> OrderBy(Expression<Func<TEntity, object>> expressions, SqlSorting sorting = SqlSorting.Ascending);
+        ISQLGenerator<TEntity> AndOrderBy(Expression<Func<TEntity, object>> expressions, SqlSorting sorting = SqlSorting.Ascending);
 
         ISQLGenerator<TEntity> AddGroupBy(params Expression<Func<TEntity, object>>[] expressions);
         string ToSql();

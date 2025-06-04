@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------
-// <copyright file="SqlSorting.cs" company="Lifeprojects.de">
-//     Class: SqlSorting
+// <copyright file="IQueryBuilder.cs" company="Lifeprojects.de">
+//     Class: IQueryBuilder
 //     Copyright © PTA GmbH 2017
 // </copyright>
 //
@@ -8,21 +8,13 @@
 // <email>development@lifeprojects.de</email>
 // <date>08.08.2017</date>
 //
-// <summary>
-//   Definition of SqlSorting Class
-//   Represents sorting operators for SELECT statements
-// </summary>
+// <summary>Definition of IQueryBuilder Interface Class</summary>
 //-----------------------------------------------------------------------
 
 namespace Inventar.Generator
 {
-    using System.ComponentModel;
-
-    public enum SQLSorting
+    public interface IQueryBuilder
     {
-        [Description("ASC")]
-        Ascending,
-        [Description("DESC")]
-        Descending
+        string BuildQuery();
     }
 }

@@ -25,6 +25,7 @@ namespace Console.ExpSoftware
     using System.Data.SQLite;
     using System.IO;
     using System.Linq;
+    using System.Security.AccessControl;
     using System.Xml;
 
     using Inventar.Database.Repository;
@@ -53,6 +54,7 @@ namespace Console.ExpSoftware
             ConsoleMenu.Add("06", "Repository Inventar", () => MenuPoint06());
             ConsoleMenu.Add("07", "Repository Attachment", () => MenuPoint07());
             ConsoleMenu.Add("08", "Repository Inventar Typen", () => MenuPoint08());
+            ConsoleMenu.Add("A1", "DynamicSQL; Select", () => MenuPointA1());
             ConsoleMenu.Add("X", "Beenden", () => ApplicationExit());
 
             do
@@ -317,6 +319,59 @@ namespace Console.ExpSoftware
             ConsoleMenu.Wait();
         }
 
+        private static void MenuPointA1()
+        {
+            Console.Clear();
+            string sqlStatment = string.Empty;
+
+            ConsoleMenu.Titel("Select alle Spalten");
+            using (DynamicSQLBuilder query = new DynamicSQLBuilder())
+            {
+                query.SelectFromTable("TAB_Inventar");
+                query.SelectAllColumns();
+                sqlStatment = query.BuildQuery();
+            }
+
+            ConsoleMenu.Continue(sqlStatment);
+
+            ConsoleMenu.Titel("Select alle Spalten und Order By");
+            using (DynamicSQLBuilder query = new DynamicSQLBuilder())
+            {
+                query.SelectFromTable("TAB_Inventar");
+                query.SelectAllColumns();
+                query.AddOrderBy("Name", SqlSorting.Ascending);
+                sqlStatment = query.BuildQuery();
+            }
+
+            ConsoleMenu.Continue(sqlStatment);
+
+            ConsoleMenu.Titel("Select alle Spalten und Where-Bedingung");
+            using (DynamicSQLBuilder query = new DynamicSQLBuilder())
+            {
+                query.SelectFromTable("TAB_Inventar");
+                query.SelectAllColumns();
+                query.AddWhere("InventarTyp", SqlComparison.Equals, 1);
+                sqlStatment = query.BuildQuery();
+            }
+
+            ConsoleMenu.Continue(sqlStatment);
+
+            ConsoleMenu.Titel("Select alle Spalten und Where-Or-Bedingung");
+            using (DynamicSQLBuilder query = new DynamicSQLBuilder())
+            {
+                WhereClause wcId = new WhereClause("Typ", SqlComparison.Equals, 1);
+                wcId.AddClause(SqlLogicOperator.Or, SqlComparison.Equals, 2);
+
+                query.SelectFromTable("TAB_Inventar");
+                query.SelectColumns("Id", "Name");
+                query.AddWhere(wcId);
+                sqlStatment = query.BuildQuery();
+            }
+
+            ConsoleMenu.Continue(sqlStatment);
+
+            ConsoleMenu.Wait();
+        }
         private static void CreateTableInDB(SQLiteConnection sqliteConnection)
         {
             SQLGenerator<Inventars> createInventar = new SQLGenerator<Inventars>(null);
@@ -402,7 +457,7 @@ namespace Console.ExpSoftware
             invUpdate.ModifiedBy = UserInfo.TS().CurrentUser;
             invUpdate.ModifiedOn = UserInfo.TS().CurrentTime;
             SQLGenerator<Inventars> updateInv = new SQLGenerator<Inventars>(invUpdate);
-            resultSql = updateInv.Update(u => u.GekauftAm, u => u.InventarAlter, u => u.ModifiedBy, u => u.ModifiedOn).Where(w => w.Id,SQLComparison.Equals, invUpdate.Id).ToSql();
+            resultSql = updateInv.Update(u => u.GekauftAm, u => u.InventarAlter, u => u.ModifiedBy, u => u.ModifiedOn).Where(w => w.Id,SqlComparison.Equals, invUpdate.Id).ToSql();
             sqliteConnection.CmdExecuteNonQuery(resultSql);
         }
 

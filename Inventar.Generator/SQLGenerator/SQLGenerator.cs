@@ -473,7 +473,7 @@ namespace Inventar.Generator
         }
 
 
-        public ISQLGenerator<TEntity> Where(Expression<Func<TEntity, object>> expressions, SQLComparison sqlCompare, object value)
+        public ISQLGenerator<TEntity> Where(Expression<Func<TEntity, object>> expressions, SqlComparison sqlCompare, object value)
         {
             this.PropertyNameWhere = ExpressionPropertyName.For<TEntity>(expressions);
 
@@ -487,19 +487,19 @@ namespace Inventar.Generator
             sb.Append(' ').Append(this.WhereOperatorAsText(sqlCompare)).Append(' ');
             if (value != null)
             {
-                if (sqlCompare == SQLComparison.In)
+                if (sqlCompare == SqlComparison.In)
                 {
                     sb.Replace(this.WhereOperatorAsText(sqlCompare), $"IN({value})");
                 }
-                else if (sqlCompare == SQLComparison.NotIn)
+                else if (sqlCompare == SqlComparison.NotIn)
                 {
                     sb.Replace(this.WhereOperatorAsText(sqlCompare), $"NOT IN({value})");
                 }
-                else if (sqlCompare == SQLComparison.Like)
+                else if (sqlCompare == SqlComparison.Like)
                 {
                     sb.Replace(this.WhereOperatorAsText(sqlCompare), $"LIKE ('{value}')");
                 }
-                else if (sqlCompare == SQLComparison.NotLike)
+                else if (sqlCompare == SqlComparison.NotLike)
                 {
                     sb.Replace(this.WhereOperatorAsText(sqlCompare), $"NOT LIKE ('{value}')");
                 }
@@ -514,7 +514,7 @@ namespace Inventar.Generator
             return this;
         }
 
-        public ISQLGenerator<TEntity> AddWhereAnd(Expression<Func<TEntity, object>> expressions, SQLComparison sqlCompare, object value = null)
+        public ISQLGenerator<TEntity> AddWhereAnd(Expression<Func<TEntity, object>> expressions, SqlComparison sqlCompare, object value = null)
         {
             const string WHERE = "WHERE";
             this.AddBracket = AddBracket.None;
@@ -553,19 +553,19 @@ namespace Inventar.Generator
                 sb.Append(' ').Append(this.WhereOperatorAsText(sqlCompare)).Append(' ');
                 if (value != null)
                 {
-                    if (sqlCompare == SQLComparison.In)
+                    if (sqlCompare == SqlComparison.In)
                     {
                         sb.Replace(this.WhereOperatorAsText(sqlCompare), $"IN({value})");
                     }
-                    else if (sqlCompare == SQLComparison.NotIn)
+                    else if (sqlCompare == SqlComparison.NotIn)
                     {
                         sb.Replace(this.WhereOperatorAsText(sqlCompare), $"NOT IN({value})");
                     }
-                    else if (sqlCompare == SQLComparison.Like)
+                    else if (sqlCompare == SqlComparison.Like)
                     {
                         sb.Replace(this.WhereOperatorAsText(sqlCompare), $"LIKE ('{value}')");
                     }
-                    else if (sqlCompare == SQLComparison.NotLike)
+                    else if (sqlCompare == SqlComparison.NotLike)
                     {
                         sb.Replace(this.WhereOperatorAsText(sqlCompare), $"NOT LIKE ('{value}')");
                     }
@@ -597,7 +597,7 @@ namespace Inventar.Generator
             return this;
         }
 
-        public ISQLGenerator<TEntity> AddWhereOr(SQLComparison sqlCompare, object value)
+        public ISQLGenerator<TEntity> AddWhereOr(SqlComparison sqlCompare, object value)
         {
             const string WHERE = "WHERE";
 
@@ -826,7 +826,7 @@ namespace Inventar.Generator
             return this;
         }
 
-        public ISQLGenerator<TEntity> OrderBy(Expression<Func<TEntity, object>> expressions, SQLSorting sorting = SQLSorting.Ascending)
+        public ISQLGenerator<TEntity> OrderBy(Expression<Func<TEntity, object>> expressions, SqlSorting sorting = SqlSorting.Ascending)
         {
             const string FROMTAB = "FROM";
             const string ORDERBY = "ORDER BY";
@@ -841,7 +841,7 @@ namespace Inventar.Generator
             return this;
         }
 
-        public ISQLGenerator<TEntity> AndOrderBy(Expression<Func<TEntity, object>> expressions, SQLSorting sorting = SQLSorting.Ascending)
+        public ISQLGenerator<TEntity> AndOrderBy(Expression<Func<TEntity, object>> expressions, SqlSorting sorting = SqlSorting.Ascending)
         {
             const string FROMTAB = "FROM";
             const string ORDERBY = "ORDER BY";
@@ -1016,15 +1016,15 @@ namespace Inventar.Generator
             }
         }
 
-        private string SortingAsText(SQLSorting sqlSorting)
+        private string SortingAsText(SqlSorting sqlSorting)
         {
             string result = string.Empty;
 
-            if (sqlSorting == SQLSorting.Ascending)
+            if (sqlSorting == SqlSorting.Ascending)
             {
                 result = "ASC";
             }
-            else if (sqlSorting == SQLSorting.Descending)
+            else if (sqlSorting == SqlSorting.Descending)
             {
                 result = "DESC";
             }
@@ -1036,59 +1036,59 @@ namespace Inventar.Generator
             return result;
         }
 
-        private string WhereOperatorAsText(SQLComparison sqlCompare)
+        private string WhereOperatorAsText(SqlComparison sqlCompare)
         {
             string result = string.Empty;
 
-            if (sqlCompare == SQLComparison.None)
+            if (sqlCompare == SqlComparison.None)
             {
                 result = string.Empty;
             }
-            else if (sqlCompare == SQLComparison.Equals)
+            else if (sqlCompare == SqlComparison.Equals)
             {
                 result = " = ";
             }
-            else if (sqlCompare == SQLComparison.NotEquals)
+            else if (sqlCompare == SqlComparison.NotEquals)
             {
                 result = " <> ";
             }
-            else if (sqlCompare == SQLComparison.GreaterOrEquals)
+            else if (sqlCompare == SqlComparison.GreaterOrEquals)
             {
                 result = " >= ";
             }
-            else if (sqlCompare == SQLComparison.GreaterThan)
+            else if (sqlCompare == SqlComparison.GreaterThan)
             {
                 result = " > ";
             }
-            else if (sqlCompare == SQLComparison.LessOrEquals)
+            else if (sqlCompare == SqlComparison.LessOrEquals)
             {
                 result = " <= ";
             }
-            else if (sqlCompare == SQLComparison.GreaterThan)
+            else if (sqlCompare == SqlComparison.GreaterThan)
             {
                 result = " < ";
             }
-            else if (sqlCompare == SQLComparison.In)
+            else if (sqlCompare == SqlComparison.In)
             {
                 result = " IN(@) ";
             }
-            else if (sqlCompare == SQLComparison.NotIn)
+            else if (sqlCompare == SqlComparison.NotIn)
             {
                 result = " NOT IN(@) ";
             }
-            else if (sqlCompare == SQLComparison.Like)
+            else if (sqlCompare == SqlComparison.Like)
             {
                 result = " LIKE ";
             }
-            else if (sqlCompare == SQLComparison.NotLike)
+            else if (sqlCompare == SqlComparison.NotLike)
             {
                 result = " NOT LIKE ";
             }
-            else if (sqlCompare == SQLComparison.IsNull)
+            else if (sqlCompare == SqlComparison.IsNull)
             {
                 result = " IS NULL ";
             }
-            else if (sqlCompare == SQLComparison.IsNotNull)
+            else if (sqlCompare == SqlComparison.IsNotNull)
             {
                 result = " IS NOT NULL";
             }
