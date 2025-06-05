@@ -9,7 +9,7 @@ namespace ConsoleN
             System.Console.Clear();
         }
 
-        public static void WriteBool(bool value, string? trueMessage, string? falseMessage)
+        public static void WriteBool(bool value, string trueMessage, string falseMessage)
         {
             if (value)
             {

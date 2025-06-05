@@ -16,6 +16,7 @@
 namespace Inventar.Database.Repository
 {
     using System;
+    using System.Data;
     using System.Data.Common;
     using System.Data.SQLite;
 
@@ -38,7 +39,7 @@ namespace Inventar.Database.Repository
 
             try
             {
-                result = new RecordSet<int>(base.Connection, $"select count(*) from {this.Tablename}").Get().Result;
+                result = base.Connection.RecordSet<int>($"select count(*) from {this.Tablename}").Get().Result;
             }
             catch (Exception ex)
             {
@@ -59,6 +60,8 @@ namespace Inventar.Database.Repository
                 List<string> invListString = base.Connection.RecordSet<List<string>>($"SELECT name FROM {this.Tablename}").Get().Result;
                 List<int> invListInt = base.Connection.RecordSet<List<int>>($"SELECT typ FROM {this.Tablename}").Get().Result;
                 List<Guid> invListGuid = base.Connection.RecordSet<List<Guid>>($"SELECT id FROM {this.Tablename}").Get().Result;
+
+                DataRow invDataRow = base.Connection.RecordSet<DataRow>($"SELECT * FROM {this.Tablename} LIMIT 1").Get().Result;
 
                 result = base.Connection.RecordSet<List<InventarTyp>>($"SELECT * FROM {this.Tablename}").Get().Result;
             }
@@ -86,6 +89,33 @@ namespace Inventar.Database.Repository
             }
         }
 
+        public void AddDataRow()
+        {
+            try
+            {
+                DataRow invDataRow = base.Connection.RecordSet<DataRow>($"SELECT * FROM {this.Tablename} LIMIT 1").Get().Result;
+                invDataRow["Id"] = Guid.NewGuid();
+                invDataRow["Name"] = "Verschiedenes";
+                invDataRow["Typ"] = 7;
+
+                using (SqlBuilderContext ctx = new SqlBuilderContext(invDataRow))
+                {
+                    ctx.CurrentUser = Environment.UserName;
+                    (string, SQLiteParameter[]) sql = ctx.GetInsert();
+                    using (SQLiteCommand cmd = new SQLiteCommand(sql.Item1, this.Connection))
+                    {
+                        cmd.Parameters.AddRange(sql.Item2);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                string errorText = ex.Message;
+                throw;
+            }
+        }
+
         public void Update(InventarTyp entity)
         {
             try
@@ -101,7 +131,36 @@ namespace Inventar.Database.Repository
             }
         }
 
-        public int Delete(Attachments entity)
+        public void UpdateDataRow()
+        {
+            try
+            {
+                DataRow invDataRow = base.Connection.RecordSet<DataRow>($"SELECT * FROM {this.Tablename} WHERE typ = 7").Get().Result;
+                if (invDataRow != null)
+                {
+                    invDataRow["Name"] = "Verschiedenes";
+                    invDataRow["Description"] = "Alles was sonst nicht passt";
+
+                    using (SqlBuilderContext ctx = new SqlBuilderContext(invDataRow))
+                    {
+                        ctx.CurrentUser = Environment.UserName;
+                        (string, SQLiteParameter[]) sql = ctx.GetUpdate();
+                        using (SQLiteCommand cmd = new SQLiteCommand(sql.Item1, this.Connection))
+                        {
+                            cmd.Parameters.AddRange(sql.Item2);
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                string errorText = ex.Message;
+                throw;
+            }
+        }
+
+        public int Delete(InventarTyp entity)
         {
             int result = 0;
 
@@ -110,6 +169,36 @@ namespace Inventar.Database.Repository
                 Dictionary<string, object> parameterCollection = new Dictionary<string, object>();
                 parameterCollection.Add("@Id", entity.Id.ToString());
                 result = base.Connection.RecordSet<int>($"DELETE FROM {this.Tablename} WHERE (Id = @Id)", parameterCollection).Set().Result;
+            }
+            catch (Exception ex)
+            {
+                string errorText = ex.Message;
+                throw;
+            }
+
+            return result;
+        }
+
+        public int DeleteDataRow()
+        {
+            int result = 0;
+
+            try
+            {
+                DataRow invDataRow = base.Connection.RecordSet<DataRow>($"SELECT * FROM {this.Tablename} WHERE typ = 7").Get().Result;
+                if (invDataRow != null)
+                {
+                    using (SqlBuilderContext ctx = new SqlBuilderContext(invDataRow))
+                    {
+                        ctx.CurrentUser = Environment.UserName;
+                        (string, SQLiteParameter[]) sql = ctx.GetDelete();
+                        using (SQLiteCommand cmd = new SQLiteCommand(sql.Item1, this.Connection))
+                        {
+                            cmd.Parameters.AddRange(sql.Item2);
+                            result = cmd.ExecuteNonQuery();
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {

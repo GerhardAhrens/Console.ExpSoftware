@@ -471,6 +471,7 @@ namespace Inventar.Generator
             return result; //.Replace("''", "'");
         }
 
+        #region Dispose Function
         public void Dispose()
         {
             this.Dispose(true);
@@ -495,6 +496,7 @@ namespace Inventar.Generator
 
             this.classIsDisposed = true;
         }
+        #endregion Dispose Function
 
         private string BuildUpdateStatement()
         {

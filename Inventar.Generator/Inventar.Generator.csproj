@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <Folder Include="DynamicSQL\" />
+    <Folder Include="SQLBuilder\" />
   </ItemGroup>
 
 </Project>

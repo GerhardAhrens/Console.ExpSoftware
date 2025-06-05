@@ -37,7 +37,7 @@ namespace Inventar.Database.Repository
 
             try
             {
-                result = new RecordSet<int>(base.Connection, $"select count(*) from {this.Tablename}").Get().Result;
+                result = base.Connection.RecordSet<int>($"select count(*) from {this.Tablename}").Get().Result;
             }
             catch (Exception ex)
             {
@@ -54,7 +54,7 @@ namespace Inventar.Database.Repository
 
             try
             {
-                result = new RecordSet<List<TEntity>>(base.Connection, $"select * from {this.Tablename}").Get().Result;
+                result = base.Connection.RecordSet<List<TEntity>>($"select * from {this.Tablename}").Get().Result;
             }
             catch (Exception ex)
             {

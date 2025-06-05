@@ -16,8 +16,6 @@
 // </summary>
 //-----------------------------------------------------------------------
 
-using ConsoleN;
-
 namespace Console.ExpSoftware
 {
     /* Imports from NET Framework */
@@ -27,8 +25,9 @@ namespace Console.ExpSoftware
     using System.Data.SQLite;
     using System.IO;
     using System.Linq;
-    using System.Security.AccessControl;
     using System.Xml;
+
+    using ConsoleN;
 
     using Inventar.Database.Repository;
     using Inventar.DatabaseCore;
@@ -50,6 +49,7 @@ namespace Console.ExpSoftware
             attachmentPath = Path.Combine(new DirectoryInfo(currentDirectory).Parent.Parent.Parent.FullName, "_DemoData", "AttachmentDemo.png");
             attachmentPath2 = Path.Combine(new DirectoryInfo(currentDirectory).Parent.Parent.Parent.FullName, "_DemoData", "AttachmentDemo2.png");
 
+            ConsoleMenu.Add("00", "ConsoleN", () => MenuPoint00());
             ConsoleMenu.Add("01", "Erstellen Datenbank und Tabelle", () => MenuPoint01());
             ConsoleMenu.Add("02", "Tabellen InventarTyp füllen", () => MenuPoint02());
             ConsoleMenu.Add("03", "Tabellen Attachment füllen", () => MenuPoint03());
@@ -59,6 +59,9 @@ namespace Console.ExpSoftware
             ConsoleMenu.Add("07", "Repository Attachment", () => MenuPoint07());
             ConsoleMenu.Add("08", "Repository Inventar Typen", () => MenuPoint08());
             ConsoleMenu.Add("A1", "DynamicSQL; Select", () => MenuPointA1());
+            ConsoleMenu.Add("A2", "DynamicSQL; Join Tabellen", () => MenuPointA2());
+            ConsoleMenu.Add("A3", "DynamicSQL; Insert Content", () => MenuPointA3());
+            ConsoleMenu.Add("B1", "SqlBuilderContext", () => MenuPointB1());
             ConsoleMenu.Add("X", "Beenden", () => ApplicationExit());
 
             do
@@ -73,6 +76,83 @@ namespace Console.ExpSoftware
         private static void ApplicationExit()
         {
             Environment.Exit(0);
+        }
+
+        private static void MenuPoint00()
+        {
+            Console.Clear();
+
+            /*
+            Console.Info("Progress started...");
+            Console.Warning("It seems there is issue in the system");
+            Console.Error("Process failed :(");
+            Console.Info("Retrying...");
+            Console.ReadLine("Press enter to continue");
+            Console.Success("Progress Succeed", showIcon: true);
+            Console.WriteLine("Wait it is not completed yet", ConsoleColor.Magenta);
+            */
+
+            /*
+            var value = Console.ReadLine("ProjectName:", "ConsoleR");
+            if (!string.IsNullOrEmpty(value))
+            {
+                Console.AsciiArt(value, ConsoleColor.Green);
+            }
+            */
+
+            /*
+            string[] frontEndFrameworks = ["Blazor", "Angular", "Vue", "React", "VanillaJs"];
+            var selectedItem = Console.Menu("Please Select One beloved frontend framework", true, frontEndFrameworks).Select();
+            Console.AsciiArt(frontEndFrameworks[selectedItem], GetFrameworkColor(frontEndFrameworks[selectedItem]));
+            */
+
+            /*
+            string[] frontEndFrameworks = ["Blazor", "Angular", "Vue", "React", "VanillaJs","AA","A1","A2","A3", "A4","A5","A6"];
+            var selectedItem = Console.Menu("Please Select One beloved frontend framework", true, frontEndFrameworks).Select();
+            */
+
+            /*
+            string[] plugins = ["TypeScript", "Linter", "Nuxt", "Vite"];
+            var selectedItems = Console.Checkbox("Select feature that you want to install:", plugins).Select();
+            for (int i = 0; i < selectedItems.Length; i++)
+            {
+                var plugin = selectedItems[i];
+                Console.WriteLine(plugin.Option, (ConsoleColor)i);
+            }
+            */
+
+            /*
+            var password = Console.Password("Ihr Passwort:");
+            Console.Alert($"Dein Passwort ist: {password}", "Passwort", ConsoleMessageType.Info);
+            */
+
+            /*
+            Person[] people2 = [
+                new Person("Gerhard",64, "Neuhofen"),
+                new Person("Charlie", 2, "Constanza"),
+                new Person("Buddy", 29, "Waldsee"),
+                new Person("Beate", 64, "Neuhofen")
+                ];
+
+            Console.Table(people2, ConsoleColor.DarkCyan);
+            */
+
+            Console.Wait();
+        }
+
+        public record Person(string Name, int Age, string City);
+
+        public static ConsoleColor GetFrameworkColor(string framework)
+        {
+            return framework switch
+            {
+                "Blazor" => ConsoleColor.DarkMagenta,
+                "Angular" => ConsoleColor.Red,
+                "Vue" => ConsoleColor.Green,
+                "React" => ConsoleColor.Blue,
+                "JS" => ConsoleColor.Yellow,
+                _ => ConsoleColor.White
+            };
         }
 
         private static void MenuPoint01()
@@ -95,7 +175,7 @@ namespace Console.ExpSoftware
             }
 
 
-            ConsoleMenu.Wait();
+            Console.Wait();
         }
 
         private static void MenuPoint02()
@@ -105,7 +185,7 @@ namespace Console.ExpSoftware
             if (File.Exists(databasePath) == false)
             {
                 Console.WriteLine($"Datenbank '{databasePath}' wurde nicht gefunden oder erstellt!");
-                ConsoleMenu.Wait();
+                Console.Wait();
                 return;
             }
 
@@ -114,7 +194,7 @@ namespace Console.ExpSoftware
                 ds.Insert(InsertNewRow);
             }
 
-            ConsoleMenu.Wait();
+            Console.Wait();
         }
 
         private static void MenuPoint03()
@@ -124,7 +204,7 @@ namespace Console.ExpSoftware
             if (File.Exists(databasePath) == false)
             {
                 Console.WriteLine($"Datenbank '{databasePath}' wurde nicht gefunden oder erstellt!");
-                ConsoleMenu.Wait();
+                Console.Wait();
                 return;
             }
 
@@ -133,7 +213,7 @@ namespace Console.ExpSoftware
                 ds.Insert(InsertAttachment);
             }
 
-            ConsoleMenu.Wait();
+            Console.Wait();
         }
 
         private static void MenuPoint04()
@@ -143,7 +223,7 @@ namespace Console.ExpSoftware
             if (File.Exists(databasePath) == false)
             {
                 Console.WriteLine($"Datenbank '{databasePath}' wurde nicht gefunden oder erstellt!");
-                ConsoleMenu.Wait();
+                Console.Wait();
                 return;
             }
 
@@ -152,7 +232,7 @@ namespace Console.ExpSoftware
                 ds.Update(InsertUpdateInventarRow);
             }
 
-            ConsoleMenu.Wait();
+            Console.Wait();
         }
 
         private static void MenuPoint05()
@@ -162,7 +242,7 @@ namespace Console.ExpSoftware
             if (File.Exists(databasePath) == false)
             {
                 Console.WriteLine($"Datenbank '{databasePath}' wurde nicht gefunden oder erstellt!");
-                ConsoleMenu.Wait();
+                Console.Wait();
                 return;
             }
 
@@ -171,7 +251,7 @@ namespace Console.ExpSoftware
                 ds.Delete(DeleteInventarRow);
             }
 
-            ConsoleMenu.Wait();
+            Console.Wait();
         }
 
         private static void MenuPoint06()
@@ -183,7 +263,7 @@ namespace Console.ExpSoftware
                 if (repository.Exist() == false)
                 {
                     Console.WriteLine($"Datenbank '{databasePath}' wurde nicht gefunden oder erstellt!");
-                    ConsoleMenu.Wait();
+                    Console.Wait();
                     return;
                 }
 
@@ -236,7 +316,7 @@ namespace Console.ExpSoftware
                 }
             }
 
-            ConsoleMenu.Wait();
+            Console.Wait();
         }
 
         private static void MenuPoint07()
@@ -248,7 +328,7 @@ namespace Console.ExpSoftware
                 if (repository.Exist() == false)
                 {
                     Console.WriteLine($"Datenbank '{databasePath}' wurde nicht gefunden oder erstellt!");
-                    ConsoleMenu.Wait();
+                    Console.Wait();
                     return;
                 }
 
@@ -278,7 +358,7 @@ namespace Console.ExpSoftware
                 }
             }
 
-            ConsoleMenu.Wait();
+            Console.Wait();
         }
 
         private static void MenuPoint08()
@@ -290,7 +370,7 @@ namespace Console.ExpSoftware
                 if (repository.Exist() == false)
                 {
                     Console.WriteLine($"Datenbank '{databasePath}' wurde nicht gefunden oder erstellt!");
-                    ConsoleMenu.Wait();
+                    Console.Wait();
                     return;
                 }
 
@@ -322,7 +402,7 @@ namespace Console.ExpSoftware
                 }
             }
 
-            ConsoleMenu.Wait();
+            Console.Wait();
         }
 
         private static void MenuPointA1()
@@ -338,7 +418,7 @@ namespace Console.ExpSoftware
                 sqlStatment = query.BuildQuery();
             }
 
-            ConsoleMenu.Continue(sqlStatment);
+            Console.Continue(sqlStatment);
 
             Console.Titel("Select alle Spalten und Order By");
             using (DynamicSQLBuilder query = new DynamicSQLBuilder())
@@ -349,7 +429,7 @@ namespace Console.ExpSoftware
                 sqlStatment = query.BuildQuery();
             }
 
-            ConsoleMenu.Continue(sqlStatment);
+            Console.Continue(sqlStatment);
 
             Console.Titel("Select alle Spalten und Where-Bedingung");
             using (DynamicSQLBuilder query = new DynamicSQLBuilder())
@@ -360,7 +440,7 @@ namespace Console.ExpSoftware
                 sqlStatment = query.BuildQuery();
             }
 
-            ConsoleMenu.Continue(sqlStatment);
+            Console.Continue(sqlStatment);
 
             Console.Titel("Select alle Spalten und Where-Or-Bedingung");
             using (DynamicSQLBuilder query = new DynamicSQLBuilder())
@@ -374,10 +454,98 @@ namespace Console.ExpSoftware
                 sqlStatment = query.BuildQuery();
             }
 
-            ConsoleMenu.Continue(sqlStatment);
+            Console.Continue(sqlStatment);
 
             Console.Wait();
         }
+
+        private static void MenuPointA2()
+        {
+            Console.Clear();
+            string sqlStatment = string.Empty;
+
+            using (DynamicSQLBuilder query = new DynamicSQLBuilder())
+            {
+                query.SelectFromTable("TAB_Inventar");
+                query.SelectColumns($"{"TAB_Inventar"}.ID", $"{"TAB_Inventar"}.Name", $"{"TAB_Inventar"}.KaufBetrag", $"{"TAB_Inventar"}.GekauftAm", "TAB_InventarTyp.Name");
+                query.AddJoin(SqlJoinType.LeftJoin, "TAB_InventarTyp", "Typ", SqlComparison.Equals, "TAB_Inventar", "InventarTyp");
+                query.AddOrderBy($"{"TAB_Inventar"}.Name", SqlSorting.Ascending);
+                query.AddOrderBy("TAB_InventarTyp.Typ", SqlSorting.Ascending);
+                sqlStatment = query.BuildQuery();
+            }
+
+            Console.Continue(sqlStatment);
+
+            Console.Wait();
+        }
+
+        private static void MenuPointA3()
+        {
+            Console.Clear();
+            string sqlStatment = string.Empty;
+
+            using (DynamicSQLBuilder query = new DynamicSQLBuilder())
+            {
+                query.InsertIntoTable("TAB_InventarTyp");
+                query.AddColumn("Id", "@Id");
+                query.AddColumn("Name", "@Name");
+                query.AddColumn("Description", "@Description");
+                query.AddColumn("Typ", "@Typ");
+                query.AddColumn("IsActive", "@IsActive");
+                query.AddColumn("CreatedBy", "@CreatedBy");
+                query.AddColumn("CreatedOn", "@CreatedOn");
+                sqlStatment = query.BuildQuery();
+            }
+
+            Console.Continue(sqlStatment);
+
+            Console.Wait();
+        }
+
+        private static void MenuPointA4()
+        {
+            Console.Clear();
+            string sqlStatment = string.Empty;
+
+            using (DynamicSQLBuilder query = new DynamicSQLBuilder())
+            {
+                query.InsertIntoTable("TAB_InventarTyp");
+                query.AddColumn("Id", "@Id");
+                query.AddColumn("Name", "@Name");
+                query.AddColumn("Description", "@Description");
+                query.AddColumn("Typ", "@Typ");
+                query.AddColumn("IsActive", "@IsActive");
+                query.AddColumn("CreatedBy", "@CreatedBy");
+                query.AddColumn("CreatedOn", "@CreatedOn");
+                sqlStatment = query.BuildQuery();
+            }
+
+            Console.Continue(sqlStatment);
+
+            Console.Wait();
+        }
+
+        private static void MenuPointB1()
+        {
+            Console.Clear();
+
+            using (InventarTypRepository<InventarTyp> repository = new InventarTypRepository<InventarTyp>())
+            {
+                if (repository.Exist() == false)
+                {
+                    Console.WriteLine($"Datenbank '{databasePath}' wurde nicht gefunden oder erstellt!");
+                    Console.Wait();
+                    return;
+                }
+
+                //repository.AddDataRow();
+                //repository.UpdateDataRow();
+                //_ = repository.DeleteDataRow();
+            }
+
+            Console.Wait();
+        }
+
         private static void CreateTableInDB(SQLiteConnection sqliteConnection)
         {
             SQLGenerator<Inventars> createInventar = new SQLGenerator<Inventars>(null);

@@ -20,3 +20,5 @@ Nun kommt das **ABER**. Wie Eingangs erwähnt gibt es natürlich auch Anforderunge
 - Nachvollziebarkeit
 
 Hier sieht man schnell, dass die schöne Welt *"alles ist möglich"* schnell wieder zusammenschrumpft.
+
+Die Codebeispiele in der Solution beschäftigen sich in der Hauptsache mit dem generieren von SQL Anweisungen auf verschiedenen Wege. Hier werden verschiedene Modelle gezeigt wie Generatoren gebaut werden können. Es werden nur Ansätze gezeigt, keine vollständig fertige Lösungen.
