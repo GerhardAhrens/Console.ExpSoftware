@@ -394,6 +394,17 @@ namespace Console.ExpSoftware
 
                     invTyp = new InventarTyp("Bilder", 6);
                     repository.Add(invTyp);
+
+                    DataRow dr = repository.NewDataRow();
+                    dr.SetField<Guid>("Id", Guid.NewGuid());
+                    dr.SetField<string>("Name", "Verschiedenes");
+                    dr.SetField<string>("Description", "Alles was nicht rein passt");
+                    dr.SetField<int>("Typ", 7);
+                    dr.SetField<bool>("IsActive", false);
+                    dr.SetField<string>("CreatedBy", UserInfo.TS().CurrentUser);
+                    dr.SetField<DateTime>("CreatedOn", UserInfo.TS().CurrentTime);
+                    repository.Add(dr);
+
                 }
                 else
                 {

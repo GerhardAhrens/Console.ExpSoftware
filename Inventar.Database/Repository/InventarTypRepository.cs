@@ -89,19 +89,14 @@ namespace Inventar.Database.Repository
             }
         }
 
-        public void AddDataRow()
+        public void Add(DataRow entity)
         {
             try
             {
-                DataRow invDataRow = base.Connection.RecordSet<DataRow>($"SELECT * FROM {this.Tablename} LIMIT 1").Get().Result;
-                invDataRow["Id"] = Guid.NewGuid();
-                invDataRow["Name"] = "Verschiedenes";
-                invDataRow["Typ"] = 7;
-
-                using (SqlBuilderContext ctx = new SqlBuilderContext(invDataRow))
+                using (SqlBuilderContext ctx = new SqlBuilderContext(entity))
                 {
-                    ctx.CurrentUser = Environment.UserName;
                     (string, SQLiteParameter[]) sql = ctx.GetInsert();
+
                     using (SQLiteCommand cmd = new SQLiteCommand(sql.Item1, this.Connection))
                     {
                         cmd.Parameters.AddRange(sql.Item2);
@@ -114,6 +109,22 @@ namespace Inventar.Database.Repository
                 string errorText = ex.Message;
                 throw;
             }
+        }
+
+        public DataRow NewDataRow()
+        {
+            DataRow result = null;
+            try
+            {
+                result = base.Connection.RecordSet<DataRow>($"SELECT * FROM {this.Tablename} LIMIT 1").New().Result;
+            }
+            catch (Exception ex)
+            {
+                string errorText = ex.Message;
+                throw;
+            }
+
+            return result;
         }
 
         public void Update(InventarTyp entity)
