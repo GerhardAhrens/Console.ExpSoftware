@@ -27,11 +27,21 @@ namespace System.Data.SQLite
     {
         public static RecordSetResult<T> RecordSet<T>(this SQLiteConnection @this, string sql)
         {
+            if (@this == null)
+            {
+                throw new ArgumentException($"Es muß ein gültiges und geöffnetes Connection-Objekt angegeben werden.");
+            }
+
             return new RecordSetResult<T>(@this,default, sql);
         }
 
         public static RecordSetResult<T> RecordSet<T>(this SQLiteConnection @this, string sql, Dictionary<string, object> parameterCollection)
         {
+            if (@this == null)
+            {
+                throw new ArgumentException($"Es muß ein gültiges und geöffnetes Connection-Objekt angegeben werden.");
+            }
+
             return new RecordSetResult<T>(@this, default, sql, parameterCollection);
         }
 
@@ -738,7 +748,18 @@ namespace System.Data.SQLite
             {
                 if (typeof(T) == typeof(DataRow))
                 {
-                    resultValue = NewDataRow<T>(@this.Connection, @this.SQL);
+                    string sql = string.Empty;
+                    if (@this.SQL.Split(' ').Length > 1)
+                    {
+                        string tableName = ExtractTablename(@this.SQL);
+                        sql = $"SELECT {tableName}.* FROM {tableName} ORDER BY rowid DESC LIMIT 1";
+                    }
+                    else
+                    {
+                        sql = $"SELECT {@this.SQL}.* FROM {@this.SQL} ORDER BY rowid DESC LIMIT 1";
+                    }
+
+                    resultValue = NewDataRow<T>(@this.Connection, sql);
                 }
             }
             catch (Exception)

@@ -117,6 +117,8 @@ namespace Inventar.Database.Repository
             try
             {
                 result = base.Connection.RecordSet<DataRow>($"SELECT * FROM {this.Tablename} LIMIT 1").New().Result;
+
+                result = base.Connection.RecordSet<DataRow>(this.Tablename).New().Result;
             }
             catch (Exception ex)
             {
