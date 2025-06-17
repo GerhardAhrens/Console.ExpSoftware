@@ -332,6 +332,8 @@ namespace Console.ExpSoftware
                     return;
                 }
 
+                byte[] attachment = repository.GetFirst();
+
                 int countAll = repository.Count();
                 if (countAll == 0)
                 {

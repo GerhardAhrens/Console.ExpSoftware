@@ -147,6 +147,10 @@ namespace System.Data.SQLite
                 {
                     resultValue = GetScalar<T>(@this.Connection, @this.SQL, @this.ParameterCollection);
                 }
+                else if (typeof(T) == typeof(byte[]) && typeof(T).IsGenericType == false && typeof(T).IsPrimitive == true && typeof(T).Namespace == "System")
+                {
+                    resultValue = GetScalar<T>(@this.Connection, @this.SQL, @this.ParameterCollection);
+                }
                 else if (typeof(T) == typeof(DataRow))
                 {
                     resultValue = GetDataRow<T>(@this.Connection, @this.SQL, @this.ParameterCollection);
@@ -913,6 +917,10 @@ namespace System.Data.SQLite
                 result = true;
             }
             else if (type.Name == typeof(float).Name)
+            {
+                result = true;
+            }
+            else if (type.Name == typeof(byte[]).Name)
             {
                 result = true;
             }
