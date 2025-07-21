@@ -18,7 +18,6 @@
 
 namespace Console.ExpSoftware
 {
-    /* Imports from NET Framework */
     using System;
     using System.Collections.Generic;
     using System.Data;
@@ -27,14 +26,13 @@ namespace Console.ExpSoftware
     using System.Linq;
     using System.Xml;
 
+    using Console = ConsoleN.Console;
     using ConsoleN;
-
+    using Inventar.CodeDOM;
     using Inventar.Database.Repository;
     using Inventar.DatabaseCore;
     using Inventar.Generator;
     using Inventar.Model;
-
-    using Console = ConsoleN.Console;
 
     public class Program
     {
@@ -62,6 +60,7 @@ namespace Console.ExpSoftware
             ConsoleMenu.Add("A2", "DynamicSQL; Join Tabellen", () => MenuPointA2());
             ConsoleMenu.Add("A3", "DynamicSQL; Insert Content", () => MenuPointA3());
             ConsoleMenu.Add("B1", "SqlBuilderContext", () => MenuPointB1());
+            ConsoleMenu.Add("C1", "CodeDOM ORM", () => MenuPointC1());
             ConsoleMenu.Add("X", "Beenden", () => ApplicationExit());
 
             do
@@ -81,7 +80,6 @@ namespace Console.ExpSoftware
         private static void MenuPoint00()
         {
             Console.Clear();
-
             /*
             Console.Info("Progress started...");
             Console.Warning("It seems there is issue in the system");
@@ -403,7 +401,7 @@ namespace Console.ExpSoftware
                     dr.SetField<bool>("IsActive", false);
                     dr.SetField<string>("CreatedBy", UserInfo.TS().CurrentUser);
                     dr.SetField<DateTime>("CreatedOn", UserInfo.TS().CurrentTime);
-                    repository.Add(dr);
+                    repository.AddDataRow(dr);
 
                 }
                 else
@@ -552,6 +550,41 @@ namespace Console.ExpSoftware
                 //repository.AddDataRow();
                 //repository.UpdateDataRow();
                 //_ = repository.DeleteDataRow();
+            }
+
+            Console.Wait();
+        }
+
+        private static void MenuPointC1()
+        {
+            /*
+             * https://github.com/AdamWhiteHat/EntityJustworks
+             */
+            Console.Clear();
+
+            using (InventarTypRepository<InventarTyp> repository = new InventarTypRepository<InventarTyp>())
+            {
+                if (repository.Exist() == false)
+                {
+                    Console.WriteLine($"Datenbank '{databasePath}' wurde nicht gefunden oder erstellt!");
+                    Console.Wait();
+                    return;
+                }
+
+               DataTable table  = repository.SelectAsDataTable();
+
+                DataTable dataTable = Table.FromClass<InventarTyp>();
+                string createTableFromTable = SQLScript.CreateTable(dataTable);
+
+                string insertSQL = SQLScript.InsertInto(table);
+
+                IList<InventarTyp> orderList = Table.ToClassInstanceCollection<InventarTyp>(table);
+
+                /*
+                DatabaseQuery.NonQueryCommand(repository.SqlConnectionString, "INSERT INTO (Id, Titel) VALUES ({0},{1})",Guid.NewGuid(),"'Test'");
+                */
+
+                DataTable queryTable = DatabaseQuery.ToDataTable(repository.SqlConnectionString, "SELECT * FROM [{0}] LIMIT 1", "TAB_InventarTyp");
             }
 
             Console.Wait();

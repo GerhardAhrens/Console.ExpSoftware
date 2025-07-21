@@ -74,6 +74,23 @@ namespace Inventar.Database.Repository
             return result;
         }
 
+        public DataTable SelectAsDataTable()
+        {
+            DataTable result = null;
+
+            try
+            {
+                result = base.Connection.RecordSet<DataTable>($"SELECT * FROM {this.Tablename}").Get().Result;
+            }
+            catch (Exception ex)
+            {
+                string errorText = ex.Message;
+                throw;
+            }
+
+            return result;
+        }
+
         public void Add(InventarTyp entity)
         {
             try
@@ -89,7 +106,7 @@ namespace Inventar.Database.Repository
             }
         }
 
-        public void Add(DataRow entity)
+        public void AddDataRow(DataRow entity)
         {
             try
             {
