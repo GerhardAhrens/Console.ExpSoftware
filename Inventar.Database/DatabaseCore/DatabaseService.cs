@@ -1,7 +1,7 @@
 ﻿//-----------------------------------------------------------------------
 // <copyright file="DatabaseService.cs" company="Lifeprojects.de">
 //     Class: DatabaseService
-//     Copyright © PTA GmbH 2019
+//     Copyright © Lifeprojects.de 2019
 // </copyright>
 //
 // <author>Gerhard Ahrens - Lifeprojects.de</author>

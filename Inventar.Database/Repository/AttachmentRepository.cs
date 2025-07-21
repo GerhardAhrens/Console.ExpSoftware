@@ -48,6 +48,23 @@ namespace Inventar.Database.Repository
             return result;
         }
 
+        public byte[] GetFirst()
+        {
+            byte[] result = null;
+
+            try
+            {
+                result = base.Connection.RecordSet<byte[]>($"select content from {this.Tablename} LIMIT 1").Get().Result;
+            }
+            catch (Exception ex)
+            {
+                string errorText = ex.Message;
+                throw;
+            }
+
+            return result;
+        }
+
         public IEnumerable<TEntity> Select()
         {
             List<TEntity> result = null;
