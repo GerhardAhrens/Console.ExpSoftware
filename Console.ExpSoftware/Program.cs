@@ -47,7 +47,6 @@ namespace Console.ExpSoftware
             attachmentPath = Path.Combine(new DirectoryInfo(currentDirectory).Parent.Parent.Parent.FullName, "_DemoData", "AttachmentDemo.png");
             attachmentPath2 = Path.Combine(new DirectoryInfo(currentDirectory).Parent.Parent.Parent.FullName, "_DemoData", "AttachmentDemo2.png");
 
-            ConsoleMenu.Add("00", "ConsoleN", () => MenuPoint00());
             ConsoleMenu.Add("01", "Erstellen Datenbank und Tabelle", () => MenuPoint01());
             ConsoleMenu.Add("02", "Tabellen InventarTyp füllen", () => MenuPoint02());
             ConsoleMenu.Add("03", "Tabellen Attachment füllen", () => MenuPoint03());
@@ -75,67 +74,6 @@ namespace Console.ExpSoftware
         private static void ApplicationExit()
         {
             Environment.Exit(0);
-        }
-
-        private static void MenuPoint00()
-        {
-            Console.Clear();
-            /*
-            Console.Info("Progress started...");
-            Console.Warning("It seems there is issue in the system");
-            Console.Error("Process failed :(");
-            Console.Info("Retrying...");
-            Console.ReadLine("Press enter to continue");
-            Console.Success("Progress Succeed", showIcon: true);
-            Console.WriteLine("Wait it is not completed yet", ConsoleColor.Magenta);
-            */
-
-            /*
-            var value = Console.ReadLine("ProjectName:", "ConsoleR");
-            if (!string.IsNullOrEmpty(value))
-            {
-                Console.AsciiArt(value, ConsoleColor.Green);
-            }
-            */
-
-            /*
-            string[] frontEndFrameworks = ["Blazor", "Angular", "Vue", "React", "VanillaJs"];
-            var selectedItem = Console.Menu("Please Select One beloved frontend framework", true, frontEndFrameworks).Select();
-            Console.AsciiArt(frontEndFrameworks[selectedItem], GetFrameworkColor(frontEndFrameworks[selectedItem]));
-            */
-
-            /*
-            string[] frontEndFrameworks = ["Blazor", "Angular", "Vue", "React", "VanillaJs","AA","A1","A2","A3", "A4","A5","A6"];
-            var selectedItem = Console.Menu("Please Select One beloved frontend framework", true, frontEndFrameworks).Select();
-            */
-
-            /*
-            string[] plugins = ["TypeScript", "Linter", "Nuxt", "Vite"];
-            var selectedItems = Console.Checkbox("Select feature that you want to install:", plugins).Select();
-            for (int i = 0; i < selectedItems.Length; i++)
-            {
-                var plugin = selectedItems[i];
-                Console.WriteLine(plugin.Option, (ConsoleColor)i);
-            }
-            */
-
-            /*
-            var password = Console.Password("Ihr Passwort:");
-            Console.Alert($"Dein Passwort ist: {password}", "Passwort", ConsoleMessageType.Info);
-            */
-
-            /*
-            Person[] people2 = [
-                new Person("Gerhard",64, "Neuhofen"),
-                new Person("Charlie", 2, "Constanza"),
-                new Person("Buddy", 29, "Waldsee"),
-                new Person("Beate", 64, "Neuhofen")
-                ];
-
-            Console.Table(people2, ConsoleColor.DarkCyan);
-            */
-
-            Console.Wait();
         }
 
         public record Person(string Name, int Age, string City);
