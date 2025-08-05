@@ -814,6 +814,160 @@ namespace System.Data.SQLite
 
         #endregion Neues DataRow
 
+        #region Execute SQL Anweisung
+        public static RecordSetResult<T> Execute<T>(this RecordSetResult<T> @this)
+        {
+            if (@this.Connection == null)
+            {
+                throw new ArgumentException($"Das Connection-Object ist null. Daher kann das RecordSet nicht ausgeführt werden");
+            }
+
+            if (@this.Connection.State != ConnectionState.Open)
+            {
+                throw new ArgumentException($"Damit das RecordSet ausgeführt werden kann, muß die Connection offen sein.");
+            }
+
+            if (CheckExecuteResultParameter(typeof(T)) == false)
+            {
+                throw new ArgumentException($"Der Typ '{typeof(T).Name}' ist für eine Execute Anweisung nicht gültig. Versuchen Sie es mit int, long.");
+            }
+
+            T resultValue = default;
+
+            try
+            {
+                if (typeof(T).IsGenericType == false && typeof(T).IsPrimitive == true && typeof(T).Namespace == "System")
+                {
+                    resultValue = ExecuteNonQuery<T>(@this.Connection, @this.SQL, @this.ParameterCollection, @this.SQLiteParameter);
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+            return new RecordSetResult<T>(@this.Connection, resultValue, @this.SQL);
+        }
+
+        private static T ExecuteNonQuery<T>(SQLiteConnection connection, string sql, Dictionary<string, object> parameterCollection, SQLiteParameter[] sqliteParameter)
+        {
+            object getAs = null;
+
+            try
+            {
+                using (SQLiteCommand cmd = new SQLiteCommand(sql, connection))
+                {
+                    if (parameterCollection != null && parameterCollection.Count > 0)
+                    {
+                        cmd.Parameters.Clear();
+                        foreach (KeyValuePair<string, object> item in parameterCollection)
+                        {
+                            cmd.Parameters.AddWithValue(item.Key, item.Value);
+                        }
+
+                        foreach (SQLiteParameter parameter in cmd.Parameters)
+                        {
+                            if (parameter.IsNullable == false)
+                            {
+                                if (parameter.DbType.ToString() == typeof(DateTime).Name)
+                                {
+                                    if ((DateTime)parameter.Value == DateTime.MinValue)
+                                    {
+                                        parameter.Value = new DateTime(1900, 1, 1);
+                                    }
+                                }
+                                else
+                                {
+                                    if (parameter.Value == DBNull.Value || parameter.Value == null)
+                                    {
+                                        parameter.Value = DBNull.Value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (sqliteParameter != null && sqliteParameter.Length > 0)
+                    {
+                        cmd.Parameters.AddRange(sqliteParameter);
+                    }
+
+                    int? result = cmd.ExecuteNonQuery();
+                    getAs = result == null ? default(T) : (T)Convert.ChangeType(result, typeof(T));
+                }
+            }
+            catch (SQLiteException ex)
+            {
+                string ErrorText = ex.Message;
+                throw;
+            }
+            catch (Exception ex)
+            {
+                string ErrorText = ex.Message;
+                throw;
+            }
+
+            return (T)getAs;
+        }
+
+        private static T ExecuteNonQuery<T>(SQLiteConnection connection, string sql, Dictionary<string, object> parameterCollection)
+        {
+            object getAs = null;
+
+            try
+            {
+                using (SQLiteCommand cmd = new SQLiteCommand(sql, connection))
+                {
+                    if (parameterCollection != null && parameterCollection.Count > 0)
+                    {
+                        cmd.Parameters.Clear();
+                        foreach (KeyValuePair<string, object> item in parameterCollection)
+                        {
+                            cmd.Parameters.AddWithValue(item.Key, item.Value);
+                        }
+
+                        foreach (SQLiteParameter parameter in cmd.Parameters)
+                        {
+                            if (parameter.IsNullable == false)
+                            {
+                                if (parameter.DbType.ToString() == typeof(DateTime).Name)
+                                {
+                                    if ((DateTime)parameter.Value == DateTime.MinValue)
+                                    {
+                                        parameter.Value = new DateTime(1900, 1, 1);
+                                    }
+                                }
+                                else
+                                {
+                                    if (parameter.Value == DBNull.Value || parameter.Value == null)
+                                    {
+                                        parameter.Value = DBNull.Value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    int? result = cmd.ExecuteNonQuery();
+                    getAs = result == null ? default(T) : (T)Convert.ChangeType(result, typeof(T));
+                }
+            }
+            catch (SQLiteException ex)
+            {
+                string ErrorText = ex.Message;
+                throw;
+            }
+            catch (Exception ex)
+            {
+                string ErrorText = ex.Message;
+                throw;
+            }
+
+            return (T)getAs;
+        }
+        #endregion Execute SQL Anweisung
+
         private static string ExtractTablename(string sql)
         {
             try
@@ -836,6 +990,7 @@ namespace System.Data.SQLite
             }
         }
 
+
         private static bool CheckSetResultParameter(Type type)
         {
             bool result = false;
@@ -857,6 +1012,26 @@ namespace System.Data.SQLite
             bool result = false;
 
             if (type.Name == typeof(DataRow).Name)
+            {
+                result = true;
+            }
+
+            return result;
+        }
+
+        private static bool CheckExecuteResultParameter(Type type)
+        {
+            bool result = false;
+
+            if (type.Name == typeof(int).Name)
+            {
+                result = true;
+            }
+            else if (type.Name == typeof(long).Name)
+            {
+                result = true;
+            }
+            else if (type.Name == typeof(string).Name)
             {
                 result = true;
             }
@@ -947,6 +1122,11 @@ namespace System.Data.SQLite
         }
 
         public string SQL { get; private set; }
+
+        /// <summary>
+        /// SQLiteParameter Array mit einer Liste von Parametern als String (Parametername) und Object (Parametervalue)
+        /// </summary>
+        public SQLiteParameter[] SQLiteParameter { get; private set; }
 
         public Dictionary<string, object> ParameterCollection { get; private set; }
 
